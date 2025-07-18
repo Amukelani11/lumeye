@@ -103,6 +103,31 @@ export interface CheckoutAbandonmentData {
   recoveryUrl: string
 }
 
+export interface AdminSaleNotificationData {
+  orderNumber: string
+  customerName: string
+  customerEmail: string
+  customerPhone?: string
+  orderDate: string
+  totalAmount: number
+  paymentMethod: string
+  paymentId: string
+  items: Array<{
+    name: string
+    quantity: number
+    price: number
+  }>
+  shippingAddress: {
+    firstName: string
+    lastName: string
+    address: string
+    city: string
+    postalCode: string
+    country: string
+  }
+  adminEmail: string
+}
+
 export class EmailService {
   private static fromEmail = process.env.RESEND_FROM_EMAIL || 'hello@lumeye.co.za'
   private static fromName = 'Lumeye'
@@ -714,6 +739,115 @@ export class EmailService {
     return this.sendEmail({
       to: data.customerEmail,
       subject: '💳 Complete Your Checkout - Your Order Awaits!',
+      html
+    })
+  }
+
+  static async sendAdminSaleNotification(data: AdminSaleNotificationData) {
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>New Sale Notification - Lumeye</title>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 700px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
+          .sale-alert { background: #fef3c7; border: 2px solid #f59e0b; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center; }
+          .order-details { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; }
+          .customer-info { background: #e0f2fe; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #0284c7; }
+          .item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
+          .total { font-weight: bold; font-size: 20px; margin-top: 20px; padding-top: 20px; border-top: 3px solid #10b981; color: #059669; }
+          .button { display: inline-block; background: #10b981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 20px 0; }
+          .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
+          .highlight { background: #fef3c7; padding: 10px; border-radius: 5px; margin: 10px 0; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>💰 New Sale Alert!</h1>
+            <p>A new order has been placed on Lumeye</p>
+          </div>
+          
+          <div class="content">
+            <div class="sale-alert">
+              <h2>🎉 Order #${data.orderNumber}</h2>
+              <p><strong>Total Amount: R${data.totalAmount.toFixed(2)}</strong></p>
+              <p>Order Date: ${data.orderDate}</p>
+            </div>
+
+            <div class="customer-info">
+              <h3>👤 Customer Information</h3>
+              <p><strong>Name:</strong> ${data.customerName}</p>
+              <p><strong>Email:</strong> ${data.customerEmail}</p>
+              ${data.customerPhone ? `<p><strong>Phone:</strong> ${data.customerPhone}</p>` : ''}
+            </div>
+
+            <div class="order-details">
+              <h3>📦 Order Items</h3>
+              ${data.items.map(item => `
+                <div class="item">
+                  <span>${item.name} (Qty: ${item.quantity})</span>
+                  <span>R${item.price.toFixed(2)}</span>
+                </div>
+              `).join('')}
+              
+              <div class="total">
+                <div class="item">
+                  <span>Total Amount:</span>
+                  <span>R${data.totalAmount.toFixed(2)}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="order-details">
+              <h3>💳 Payment Information</h3>
+              <p><strong>Payment Method:</strong> ${data.paymentMethod}</p>
+              <p><strong>Payment ID:</strong> ${data.paymentId}</p>
+              <p><strong>Status:</strong> <span style="color: #10b981; font-weight: bold;">Completed</span></p>
+            </div>
+
+            <div class="order-details">
+              <h3>🚚 Shipping Address</h3>
+              <p>
+                ${data.shippingAddress.firstName} ${data.shippingAddress.lastName}<br>
+                ${data.shippingAddress.address}<br>
+                ${data.shippingAddress.city}, ${data.shippingAddress.postalCode}<br>
+                ${data.shippingAddress.country}
+              </p>
+            </div>
+
+            <div style="text-align: center;">
+              <a href="${process.env.NEXT_PUBLIC_YOCO_BASE_URL || 'http://localhost:3000'}/admin/orders" class="button">View Order in Admin Panel</a>
+            </div>
+
+            <div class="highlight">
+              <p><strong>Next Steps:</strong></p>
+              <ul>
+                <li>✅ Process the order in your admin panel</li>
+                <li>📦 Prepare the shipment</li>
+                <li>🚚 Update tracking information</li>
+                <li>📧 Send shipping confirmation to customer</li>
+              </ul>
+            </div>
+
+            <div class="footer">
+              <p>This is an automated notification from your Lumeye e-commerce system.</p>
+              <p>Order processed at ${new Date().toLocaleString('en-US', { timeZone: 'Africa/Johannesburg' })}</p>
+            </div>
+          </div>
+        </div>
+      </body>
+      </html>
+    `
+
+    return this.sendEmail({
+      to: data.adminEmail,
+      subject: `💰 New Sale Alert - Order #${data.orderNumber} - R${data.totalAmount.toFixed(2)}`,
       html
     })
   }

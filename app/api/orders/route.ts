@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { EmailService } from '@/lib/email'
+import { getAdminUsers } from '@/lib/admin'
 
 // Function to generate tracking number
 function generateTrackingNumber(): string {
@@ -176,6 +177,53 @@ export async function POST(request: NextRequest) {
     } catch (emailError) {
       console.error('Error sending order confirmation email:', emailError)
       // Don't fail the order creation if email fails
+    }
+
+    // Send admin notification for new sale
+    try {
+      const adminUsers = await getAdminUsers()
+      
+      if (adminUsers.length > 0) {
+        // Send notification to all admin users
+        const adminNotificationPromises = adminUsers.map(adminUser => 
+          EmailService.sendAdminSaleNotification({
+            orderNumber: order.order_number,
+            customerName: `${shippingAddress.first_name} ${shippingAddress.last_name}`,
+            customerEmail: email,
+            customerPhone: phone,
+            orderDate: new Date().toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            }),
+            totalAmount: order.total_amount,
+            paymentMethod: paymentMethod,
+            paymentId: paymentId,
+            items: items.map((item: any) => ({
+              name: item.name || 'Lumeye Under Eye Serum',
+              quantity: item.quantity,
+              price: item.unit_price
+            })),
+            shippingAddress: {
+              firstName: shippingAddress.first_name,
+              lastName: shippingAddress.last_name,
+              address: shippingAddress.address_line_1,
+              city: shippingAddress.city,
+              postalCode: shippingAddress.postal_code,
+              country: shippingAddress.country || 'South Africa'
+            },
+            adminEmail: adminUser.email
+          })
+        )
+
+        await Promise.all(adminNotificationPromises)
+        console.log(`Admin sale notifications sent to ${adminUsers.length} admin users`)
+      } else {
+        console.log('No admin users found to send sale notification')
+      }
+    } catch (adminEmailError) {
+      console.error('Error sending admin sale notification:', adminEmailError)
+      // Don't fail the order creation if admin email fails
     }
 
     return NextResponse.json({ 
