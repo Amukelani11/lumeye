@@ -5,6 +5,7 @@ import type React from "react"
 import { useState } from "react"
 import Footer from "../components/Footer"
 import { Mail, Phone, MapPin, Clock, Send } from "lucide-react"
+import { trackContact } from "../../lib/meta-pixel"
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -26,6 +27,9 @@ export default function ContactPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
+
+    // Track contact form submission
+    trackContact()
 
     // Simulate form submission
     setTimeout(() => {

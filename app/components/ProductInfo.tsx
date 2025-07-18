@@ -1,15 +1,21 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Star, Minus, Plus, ShoppingBag, Zap } from "lucide-react"
 import { useCart } from "../lib/cart-context"
+import { trackViewContent, trackAddToCart, trackInitiateCheckout } from "../../lib/meta-pixel"
 
 export default function ProductInfo() {
   const [quantity, setQuantity] = useState(1)
   const { dispatch } = useCart()
   const router = useRouter()
+
+  // Track product view on component mount
+  useEffect(() => {
+    trackViewContent('Lumeye Under Eye Serum', 'product')
+  }, [])
 
   const increaseQuantity = () => setQuantity((prev) => prev + 1)
   const decreaseQuantity = () => setQuantity((prev) => Math.max(1, prev - 1))
@@ -26,6 +32,8 @@ export default function ProductInfo() {
         },
       })
     }
+    // Track add to cart event
+    trackAddToCart(299 * quantity, 'ZAR', 'Lumeye Under Eye Serum')
     // Reset quantity after adding to cart
     setQuantity(1)
   }
@@ -41,6 +49,8 @@ export default function ProductInfo() {
         image: "/lumeye shot 5.png",
       },
     })
+    // Track initiate checkout event
+    trackInitiateCheckout(299 * quantity, 'ZAR')
     // Navigate to checkout
     router.push('/checkout')
   }

@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense } from "react"
 import { CheckCircle, Package, Truck, Mail } from "lucide-react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
+import { trackPurchase } from "../../lib/meta-pixel"
 
 function OrderConfirmationContent() {
   const searchParams = useSearchParams()
@@ -13,7 +14,15 @@ function OrderConfirmationContent() {
   useEffect(() => {
     // Set loading to false immediately since we don't need to fetch order details
     setLoading(false)
-  }, [])
+    
+    // Track purchase event for Meta Pixel
+    if (orderId) {
+      trackPurchase(299, 'ZAR', orderId)
+    } else {
+      // Fallback if no order ID
+      trackPurchase(299, 'ZAR')
+    }
+  }, [orderId])
 
   if (loading) {
     return (
