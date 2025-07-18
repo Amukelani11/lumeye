@@ -1,0 +1,86 @@
+import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+
+export async function middleware(req: NextRequest) {
+  // Temporarily disable middleware to test session
+  return NextResponse.next()
+  
+  const res = NextResponse.next()
+  const supabase = createMiddlewareClient({ req, res })
+
+  // Refresh session if expired
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+
+  console.log('Middleware - Path:', req.nextUrl.pathname)
+  console.log('Middleware - Session exists:', !!session)
+  if (session) {
+    console.log('Middleware - User email:', session.user.email)
+  }
+
+  // Check if user is trying to access admin routes
+  if (req.nextUrl.pathname.startsWith('/admin')) {
+    console.log('Middleware - Accessing admin route')
+    if (!session) {
+      console.log('Middleware - No session, redirecting to login')
+      // Redirect to login if not authenticated
+      return NextResponse.redirect(new URL('/login', req.url))
+    }
+
+    // Check if user is admin
+    const { data: userData, error: userError } = await supabase
+      .from('users')
+      .select('is_admin')
+      .eq('id', session.user.id)
+      .single()
+
+    console.log('Middleware - Admin check result:', userData)
+    console.log('Middleware - Admin check error:', userError)
+
+    if (!userData?.is_admin) {
+      console.log('Middleware - Not admin, redirecting to home')
+      // Redirect to home if not admin
+      return NextResponse.redirect(new URL('/', req.url))
+    }
+    console.log('Middleware - Admin access granted')
+  }
+
+  // Check if user is trying to access auth routes while already logged in
+  if (session && (req.nextUrl.pathname.startsWith('/login') || req.nextUrl.pathname.startsWith('/signup'))) {
+    console.log('Middleware - Logged in user accessing auth route')
+    // Check if user is admin and redirect accordingly
+    const { data: userData, error: userError } = await supabase
+      .from('users')
+      .select('is_admin')
+      .eq('id', session.user.id)
+      .single()
+
+    console.log('Middleware - Auth route admin check:', userData)
+    console.log('Middleware - Auth route admin error:', userError)
+
+    if (userData?.is_admin) {
+      console.log('Middleware - Admin user, redirecting to admin')
+      return NextResponse.redirect(new URL('/admin', req.url))
+    } else {
+      console.log('Middleware - Regular user, redirecting to home')
+      return NextResponse.redirect(new URL('/', req.url))
+    }
+  }
+
+  return res
+}
+
+export const config = {
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - public folder
+     */
+    '/((?!_next/static|_next/image|favicon.ico|public).*)',
+  ],
+} 

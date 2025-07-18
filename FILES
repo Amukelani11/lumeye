@@ -1,0 +1,76 @@
+\`\`\`typescript
+// tailwind.config.ts
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+content: [
+  "./app/**/*.{js,ts,jsx,tsx,mdx}",
+  "./pages/**/*.{js,ts,jsx,tsx,mdx}",
+  "./components/**/*.{js,ts,jsx,tsx,mdx}",
+],
+theme: {
+  extend: {
+    colors: {
+      blush: "#fceeee",
+      rosegold: "#b76e79",
+      beige: "#fdfaf8",
+      "cool-grey": "#f7f7f7",
+    },
+    fontFamily: {
+      sans: ["var(--font-inter)"],
+      mono: ["var(--font-roboto-mono)"],
+    },
+  },
+},
+plugins: [require("@tailwindcss/forms")],
+};
+\`\`\`
+
+\`\`\`css
+/* app/globals.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+--foreground-rgb: 0, 0, 0;
+--background-start-rgb: 255, 255, 255;
+--background-end-rgb: 255, 255, 255;
+}
+
+@media (prefers-color-scheme: dark) {
+:root {
+  --foreground-rgb: 255, 255, 255;
+  --background-start-rgb: 0, 0, 0;
+  --background-end-rgb: 0, 0, 0;
+}
+}
+
+body {
+color: rgb(var(--foreground-rgb));
+background: linear-gradient(
+    to bottom,
+    transparent,
+    rgb(var(--background-end-rgb))
+  )
+  rgb(var(--background-start-rgb));
+}
+
+.btn-primary {
+@apply bg-rosegold text-white font-bold py-2 px-4 rounded;
+}
+
+.btn-secondary {
+@apply bg-white text-rosegold border-2 border-rosegold font-bold py-2 px-4 rounded;
+}
+\`\`\`
+
+\`\`\`typescript
+// Example: HeroSection.tsx (and ALL other component/page files)
+// Replace all instances of bg-rose-gold, text-rose-gold, border-rose-gold, and fill-rose-gold
+// with bg-rosegold, text-rosegold, border-rosegold, and fill-rosegold respectively.
+
+// Example:
+// <span className="text-rosegold">Brighten.</span>
+// ...
+// <div className="absolute -top-4 -right-4 bg-rosegold text-white ...">
+\`\`\`
