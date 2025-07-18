@@ -23,7 +23,7 @@ type CartAction =
   | { type: "UPDATE_QUANTITY"; payload: { id: string; quantity: number } }
   | { type: "CLEAR_CART" }
   | { type: "LOAD_CART"; payload: CartItem[] }
-  | { type: "BUY_NOW"; payload: Omit<CartItem, "quantity"> }
+  | { type: "BUY_NOW"; payload: Omit<CartItem, "quantity"> & { quantity: number } }
 
 const CartContext = createContext<{
   state: CartState
@@ -70,8 +70,8 @@ function cartReducer(state: CartState, action: CartAction): CartState {
       return calculateTotals({ ...state, items: action.payload })
 
     case "BUY_NOW": {
-      // Clear cart and add only the buy now item
-      const newItem = { ...action.payload, quantity: 1 }
+      // Clear cart and add only the buy now item with specified quantity
+      const newItem = { ...action.payload, quantity: action.payload.quantity }
       return calculateTotals({ ...state, items: [newItem] })
     }
 

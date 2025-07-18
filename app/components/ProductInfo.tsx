@@ -39,7 +39,7 @@ export default function ProductInfo() {
   }
 
   const buyNow = () => {
-    // Clear cart and add the item for immediate checkout
+    // Clear cart and add the item for immediate checkout with selected quantity
     dispatch({
       type: "BUY_NOW",
       payload: {
@@ -47,6 +47,7 @@ export default function ProductInfo() {
         name: "Lumeye Under Eye Serum",
         price: 299,
         image: "/lumeye shot 5.png",
+        quantity: quantity,
       },
     })
     // Track initiate checkout event
@@ -116,7 +117,7 @@ export default function ProductInfo() {
             className="w-full bg-pink-600 hover:bg-pink-700 text-white font-semibold py-4 px-6 rounded-lg transition-colors flex items-center justify-center space-x-2"
           >
             <Zap className="w-5 h-5" />
-            <span>Buy Now - R{currentPrice}</span>
+            <span>Buy Now - R{currentPrice * quantity}</span>
           </button>
 
           {/* Add to Cart Button */}
