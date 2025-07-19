@@ -7,11 +7,13 @@ import { Star, Minus, Plus, ShoppingBag, Zap } from "lucide-react"
 import { useCart } from "../lib/cart-context"
 import { trackViewContent, trackAddToCart, trackInitiateCheckout } from "../../lib/meta-pixel"
 import { trackViewItem, trackAddToCart as gaTrackAddToCart, trackBeginCheckout as gaTrackBeginCheckout } from "../../lib/google-analytics"
+import { useVisitorTracking } from "../../hooks/useVisitorTracking"
 
 export default function ProductInfo() {
   const [quantity, setQuantity] = useState(1)
   const { dispatch } = useCart()
   const router = useRouter()
+  const { trackActivity } = useVisitorTracking()
 
   // Track product view on component mount
   useEffect(() => {
@@ -23,7 +25,11 @@ export default function ProductInfo() {
       currency: 'ZAR',
       quantity: 1
     })
-  }, [])
+    trackActivity({ 
+      action: 'page_view',
+      page: '/product'
+    })
+  }, [trackActivity])
 
   const increaseQuantity = () => setQuantity((prev) => prev + 1)
   const decreaseQuantity = () => setQuantity((prev) => Math.max(1, prev - 1))
@@ -49,6 +55,11 @@ export default function ProductInfo() {
       currency: 'ZAR',
       quantity: quantity
     })
+    trackActivity({
+      action: 'cart_add',
+      cartValue: 299 * quantity,
+      items: [{ name: 'Lumeye Under Eye Serum', quantity, price: 299 }]
+    })
     // Reset quantity after adding to cart
     setQuantity(1)
   }
@@ -73,6 +84,11 @@ export default function ProductInfo() {
       price: 299,
       quantity: quantity
     }], 'ZAR')
+    trackActivity({
+      action: 'checkout_start',
+      cartValue: 299 * quantity,
+      items: [{ name: 'Lumeye Under Eye Serum', quantity, price: 299 }]
+    })
     // Navigate to checkout
     router.push('/checkout')
   }

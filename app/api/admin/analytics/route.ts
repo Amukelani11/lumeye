@@ -6,24 +6,24 @@ export async function GET() {
     // Get current timestamp for "active users" (users active in last 5 minutes)
     const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000)
     
-    // Active users (sessions in last 5 minutes) - using cart activity as proxy
+    // Live visitors (active in last 5 minutes)
     const { count: activeUsers } = await supabase
-      .from('carts')
+      .from('live_visitors')
       .select('*', { count: 'exact', head: true })
-      .gte('updated_at', fiveMinutesAgo.toISOString())
+      .gte('last_activity', fiveMinutesAgo.toISOString())
 
-    // Cart abandonment (carts created in last 24 hours but not purchased)
+    // Cart abandonment (from last 24 hours)
     const { count: cartAbandonment } = await supabase
-      .from('carts')
+      .from('abandoned_carts')
       .select('*', { count: 'exact', head: true })
+      .in('status', ['cart_active', 'email_captured'])
       .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
-      .not('id', 'in', `(SELECT cart_id FROM orders WHERE status = 'confirmed')`)
 
-    // Checkout abandonment - using orders that are pending
+    // Checkout abandonment (from last 24 hours)
     const { count: checkoutAbandonment } = await supabase
-      .from('orders')
+      .from('checkout_abandonments')
       .select('*', { count: 'exact', head: true })
-      .eq('status', 'pending')
+      .eq('status', 'checkout_started')
       .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
 
     // Sales data (last 30 days)

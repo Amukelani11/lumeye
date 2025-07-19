@@ -9,6 +9,7 @@ import RecentActivityWidget from "./components/RecentActivityWidget"
 import OrderDetailsWidget from "./components/OrderDetailsWidget"
 import CustomerReviewsWidget from "./components/CustomerReviewsWidget"
 import VisitorAnalyticsWidget from "./components/VisitorAnalyticsWidget"
+import LiveVisitorsWidget from "./components/LiveVisitorsWidget"
 
 export default function AdminDashboard() {
   return (
@@ -25,8 +26,12 @@ export default function AdminDashboard() {
           <AdPerformanceWidget />
         </div>
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8">
+          <LiveVisitorsWidget />
           <FunnelWidget />
+        </div>
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8">
           <RecentActivityWidget />
+          <OrderDetailsWidget />
         </div>
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8">
           <CustomerReviewsWidget />

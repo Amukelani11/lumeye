@@ -1,14 +1,28 @@
 "use client"
 
 import { useCart } from "../lib/cart-context"
+import { useVisitorTracking } from "../../hooks/useVisitorTracking"
 import CheckoutForm from "../components/CheckoutForm"
 import CheckoutSummary from "../components/CheckoutSummary"
 import Link from "next/link"
 import { ArrowLeft, ShoppingBag } from "lucide-react"
 import Footer from "../components/Footer"
+import { useEffect } from "react"
 
 export default function CheckoutPage() {
   const { state } = useCart()
+  const { trackActivity } = useVisitorTracking()
+
+  // Track checkout page view
+  useEffect(() => {
+    const cartValue = state.items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+    trackActivity({
+      action: 'page_view',
+      page: '/checkout',
+      cartValue,
+      items: state.items
+    })
+  }, [trackActivity, state.items])
 
   if (state.items.length === 0) {
     return (

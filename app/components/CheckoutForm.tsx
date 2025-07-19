@@ -44,16 +44,17 @@ export default function CheckoutForm() {
 
     // Capture email for abandoned cart tracking
     if (name === 'email' && value && value.includes('@')) {
-      const sessionId = localStorage.getItem('cart_session_id') || `session_${Date.now()}`
-      fetch('/api/capture-email', {
+      const cartValue = state.items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+      fetch('/api/track-visitor', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          action: 'email_capture',
           email: value,
-          sessionId,
-          cartData: state.items
+          cartValue,
+          items: state.items
         }),
       }).catch(error => {
         console.error('Error capturing email:', error)
