@@ -134,16 +134,27 @@ export class EmailService {
 
   static async sendEmail(data: EmailData) {
     try {
+      // Check if Resend API key is configured
+      if (!process.env.RESEND_API_KEY) {
+        console.error('RESEND_API_KEY is not configured')
+        return { 
+          success: false, 
+          error: 'Email service not configured. Please set RESEND_API_KEY environment variable.' 
+        }
+      }
+
       const result = await resend.emails.send({
         from: data.from || `${this.fromName} <${this.fromEmail}>`,
         to: data.to,
         subject: data.subject,
         html: data.html,
       })
+      
+      console.log('Email sent successfully:', { to: data.to, subject: data.subject })
       return { success: true, data: result }
     } catch (error) {
       console.error('Email sending failed:', error)
-      return { success: false, error }
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
     }
   }
 

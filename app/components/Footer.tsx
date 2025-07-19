@@ -44,7 +44,9 @@ export default function Footer() {
         trackCompleteRegistration()
         trackNewsletterSignup()
       } else {
-        setSubscriptionMessage(data.error || "Failed to subscribe. Please try again.")
+        const errorMessage = data.error || data.message || "Failed to subscribe. Please try again."
+        setSubscriptionMessage(errorMessage)
+        console.error('Newsletter subscription error:', data)
       }
     } catch (error) {
       setSubscriptionMessage("An error occurred. Please try again.")
