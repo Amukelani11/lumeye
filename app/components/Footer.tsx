@@ -5,6 +5,7 @@ import Image from "next/image"
 import { useState } from "react"
 import { Mail, Phone, MapPin, Instagram, Facebook, Twitter } from "lucide-react"
 import { trackCompleteRegistration } from "../../lib/meta-pixel"
+import { trackNewsletterSignup } from "../../lib/google-analytics"
 
 export default function Footer() {
   const [email, setEmail] = useState("")
@@ -41,6 +42,7 @@ export default function Footer() {
         setEmail("")
         // Track newsletter signup
         trackCompleteRegistration()
+        trackNewsletterSignup()
       } else {
         setSubscriptionMessage(data.error || "Failed to subscribe. Please try again.")
       }

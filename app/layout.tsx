@@ -87,6 +87,20 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${dmSans.variable} ${inter.variable}`}>
       <head>
+        {/* Google Analytics */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-G2YY6DJHV8"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-G2YY6DJHV8');
+          `}
+        </Script>
+        
         {/* Meta Pixel Code */}
         <Script
           id="meta-pixel"

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { Star, Minus, Plus, ShoppingBag, Zap } from "lucide-react"
 import { useCart } from "../lib/cart-context"
 import { trackViewContent, trackAddToCart, trackInitiateCheckout } from "../../lib/meta-pixel"
+import { trackViewItem, trackAddToCart as gaTrackAddToCart, trackBeginCheckout as gaTrackBeginCheckout } from "../../lib/google-analytics"
 
 export default function ProductInfo() {
   const [quantity, setQuantity] = useState(1)
@@ -15,6 +16,13 @@ export default function ProductInfo() {
   // Track product view on component mount
   useEffect(() => {
     trackViewContent('Lumeye Under Eye Serum', 'product')
+    trackViewItem({
+      item_id: 'lumeye-serum',
+      item_name: 'Lumeye Under Eye Serum',
+      price: 299,
+      currency: 'ZAR',
+      quantity: 1
+    })
   }, [])
 
   const increaseQuantity = () => setQuantity((prev) => prev + 1)
@@ -34,6 +42,13 @@ export default function ProductInfo() {
     }
     // Track add to cart event
     trackAddToCart(299 * quantity, 'ZAR', 'Lumeye Under Eye Serum')
+    gaTrackAddToCart({
+      item_id: 'lumeye-serum',
+      item_name: 'Lumeye Under Eye Serum',
+      price: 299,
+      currency: 'ZAR',
+      quantity: quantity
+    })
     // Reset quantity after adding to cart
     setQuantity(1)
   }
@@ -52,6 +67,12 @@ export default function ProductInfo() {
     })
     // Track initiate checkout event
     trackInitiateCheckout(299 * quantity, 'ZAR')
+    gaTrackBeginCheckout([{
+      item_id: 'lumeye-serum',
+      item_name: 'Lumeye Under Eye Serum',
+      price: 299,
+      quantity: quantity
+    }], 'ZAR')
     // Navigate to checkout
     router.push('/checkout')
   }

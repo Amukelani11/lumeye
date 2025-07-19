@@ -6,6 +6,7 @@ import { useState } from "react"
 import Footer from "../components/Footer"
 import { Mail, Phone, MapPin, Clock, Send } from "lucide-react"
 import { trackContact } from "../../lib/meta-pixel"
+import { trackContact as gaTrackContact } from "../../lib/google-analytics"
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -30,6 +31,7 @@ export default function ContactPage() {
 
     // Track contact form submission
     trackContact()
+    gaTrackContact()
 
     // Simulate form submission
     setTimeout(() => {

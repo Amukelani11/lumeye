@@ -5,6 +5,7 @@ import { CheckCircle, Package, Truck, Mail } from "lucide-react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { trackPurchase } from "../../lib/meta-pixel"
+import { trackPurchase as gaTrackPurchase } from "../../lib/google-analytics"
 
 function OrderConfirmationContent() {
   const searchParams = useSearchParams()
@@ -22,6 +23,19 @@ function OrderConfirmationContent() {
       // Fallback if no order ID
       trackPurchase(299, 'ZAR')
     }
+    
+    // Track purchase event for Google Analytics
+    gaTrackPurchase({
+      transaction_id: orderId || `order_${Date.now()}`,
+      value: 299,
+      currency: 'ZAR',
+      items: [{
+        item_id: 'lumeye-serum',
+        item_name: 'Lumeye Under Eye Serum',
+        price: 299,
+        quantity: 1
+      }]
+    })
   }, [orderId])
 
   if (loading) {
