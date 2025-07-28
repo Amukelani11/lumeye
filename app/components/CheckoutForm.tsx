@@ -4,6 +4,7 @@ import type React from "react"
 import { useState } from "react"
 import { Shield, Truck, RotateCcw, CreditCard, Lock, ExternalLink } from "lucide-react"
 import { useCart } from "../lib/cart-context"
+import { useDiscount } from "../lib/discount-context"
 
 interface FormData {
   email: string
@@ -21,6 +22,7 @@ interface FormErrors {
 
 export default function CheckoutForm() {
   const { state, dispatch } = useCart()
+  const { applyDiscount } = useDiscount()
   const [isProcessing, setIsProcessing] = useState(false)
   const [formData, setFormData] = useState<FormData>({
     email: "",
@@ -42,9 +44,11 @@ export default function CheckoutForm() {
       setErrors((prev) => ({ ...prev, [name]: "" }))
     }
 
-    // Capture email for abandoned cart tracking
+    // Capture email for abandoned cart tracking and apply discount
     if (name === 'email' && value && value.includes('@')) {
       const cartValue = state.items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+      
+      // Track email capture
       fetch('/api/track-visitor', {
         method: 'POST',
         headers: {
@@ -58,6 +62,24 @@ export default function CheckoutForm() {
         }),
       }).catch(error => {
         console.error('Error capturing email:', error)
+      })
+
+      // Check if this email has a discount
+      fetch('/api/check-discount', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: value
+        }),
+      }).then(response => response.json())
+      .then(data => {
+        if (data.hasDiscount) {
+          applyDiscount('WELCOME10', cartValue)
+        }
+      }).catch(error => {
+        console.error('Error checking discount:', error)
       })
     }
   }

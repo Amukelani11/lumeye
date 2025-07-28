@@ -5,6 +5,7 @@ import "./globals.css"
 import Header from "./components/Header"
 import { CartProvider } from "./lib/cart-context"
 import Script from "next/script"
+import EmailCaptureWrapper from "./components/EmailCaptureWrapper"
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -135,6 +136,7 @@ export default function RootLayout({
         <CartProvider>
           <Header />
           {children}
+          <EmailCaptureWrapper />
         </CartProvider>
       </body>
     </html>

@@ -9,6 +9,7 @@ export default function Sidebar() {
         <a href="/admin/orders" className="block px-4 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100">Orders</a>
         <a href="/admin/abandoned-carts" className="block px-4 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100">Abandoned Carts</a>
         <a href="/admin/checkout-abandonments" className="block px-4 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100">Checkout Abandonments</a>
+        <a href="/admin/email-captures" className="block px-4 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100">Email Captures</a>
         <a href="/admin/products" className="block px-4 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100">Products</a>
         <a href="/admin/customers" className="block px-4 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100">Customers</a>
         <a href="/admin/inquiries" className="block px-4 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100">Inquiries</a>

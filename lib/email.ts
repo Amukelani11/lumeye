@@ -103,6 +103,17 @@ export interface CheckoutAbandonmentData {
   recoveryUrl: string
 }
 
+export interface CheckoutAbandonmentReminderData {
+  email: string
+  cartValue: number
+  items: Array<{
+    name: string
+    quantity: number
+    price: number
+  }>
+  reminderType: 'first' | 'second'
+}
+
 export interface AdminSaleNotificationData {
   orderNumber: string
   customerName: string
@@ -859,6 +870,93 @@ export class EmailService {
     return this.sendEmail({
       to: data.adminEmail,
       subject: `💰 New Sale Alert - Order #${data.orderNumber} - R${data.totalAmount.toFixed(2)}`,
+      html
+    })
+  }
+
+  static async sendCheckoutAbandonmentReminder(data: CheckoutAbandonmentReminderData) {
+    const isFirstReminder = data.reminderType === 'first'
+    const subject = isFirstReminder 
+      ? "Don't forget to complete your order! 🛒" 
+      : "Your cart is waiting for you! ⏰"
+    
+    const urgencyText = isFirstReminder 
+      ? "We noticed you started checking out but didn't complete your purchase. Your items are still in your cart!"
+      : "It's been a while since you started checking out. Your items are still waiting for you!"
+    
+    const ctaText = isFirstReminder ? "Complete Your Order" : "Finish Your Purchase"
+    
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Complete Your Order</title>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #ec4899, #be185d); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: white; padding: 30px; border-radius: 0 0 10px 10px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+          .cart-items { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; }
+          .item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
+          .item:last-child { border-bottom: none; }
+          .total { font-weight: bold; font-size: 1.2em; color: #ec4899; }
+          .btn { display: inline-block; background: #ec4899; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; margin: 20px 0; font-weight: bold; font-size: 1.1em; }
+          .urgency { background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 8px; margin: 20px 0; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>${isFirstReminder ? '🛒' : '⏰'} ${isFirstReminder ? 'Complete Your Order' : 'Your Cart is Waiting!'}</h1>
+            <p>Don't miss out on your Lumeye products</p>
+          </div>
+          <div class="content">
+            <div class="urgency">
+              <h3>${isFirstReminder ? 'Quick Reminder' : 'Final Reminder'}</h3>
+              <p>${urgencyText}</p>
+            </div>
+            
+            <h3>Your Cart Items</h3>
+            <div class="cart-items">
+              ${data.items.map(item => `
+                <div class="item">
+                  <span>${item.name} x${item.quantity}</span>
+                  <span>R${item.price.toFixed(2)}</span>
+                </div>
+              `).join('')}
+              
+              <div class="total">
+                <div class="item">
+                  <span>Total Value:</span>
+                  <span>R${data.cartValue.toFixed(2)}</span>
+                </div>
+              </div>
+            </div>
+            
+            <div style="text-align: center;">
+              <a href="${process.env.NEXT_PUBLIC_SITE_URL}/checkout" class="btn">${ctaText}</a>
+            </div>
+            
+            <p style="text-align: center; color: #666; font-size: 0.9em;">
+              This link will take you directly to checkout with your items already in your cart.
+            </p>
+            
+            <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
+            
+            <p style="color: #666; font-size: 0.9em;">
+              If you have any questions, please don't hesitate to contact us at hello@lumeye.co.za
+            </p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `
+    
+    return this.sendEmail({
+      to: data.email,
+      subject,
       html
     })
   }

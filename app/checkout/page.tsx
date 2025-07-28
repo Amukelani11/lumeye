@@ -2,6 +2,7 @@
 
 import { useCart } from "../lib/cart-context"
 import { useVisitorTracking } from "../../hooks/useVisitorTracking"
+import { DiscountProvider } from "../lib/discount-context"
 import CheckoutForm from "../components/CheckoutForm"
 import CheckoutSummary from "../components/CheckoutSummary"
 import Link from "next/link"
@@ -54,10 +55,12 @@ export default function CheckoutPage() {
           <p className="text-gray-600 mt-2">Complete your order</p>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-12">
-          <CheckoutForm />
-          <CheckoutSummary />
-        </div>
+        <DiscountProvider>
+          <div className="grid lg:grid-cols-2 gap-12">
+            <CheckoutForm />
+            <CheckoutSummary />
+          </div>
+        </DiscountProvider>
       </main>
       <Footer />
     </>
