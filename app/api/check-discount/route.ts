@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
 
       // For WELCOME10, allow any email to use it (one-time use per email)
       if (discountCode.toUpperCase() === 'WELCOME10') {
-        // Check if this email has already used this discount
+        // Check if this email has already used this discount in a completed checkout
         const { data: emailCapture, error } = await supabase
           .from('email_captures')
           .select('*')
@@ -37,8 +37,8 @@ export async function POST(request: NextRequest) {
         }
 
         // If email doesn't exist in captures, they can use the discount
-        // If email exists but discount not applied, they can use it
-        const hasDiscount = !emailCapture || !emailCapture.discount_applied
+        // If email exists but discount not used in completed checkout, they can use it
+        const hasDiscount = !emailCapture || !(emailCapture.discount_applied && emailCapture.order_completed)
 
         return NextResponse.json({
           hasDiscount,
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
         })
       }
 
-      // For other discount codes, check if this email has already used this discount
+      // For other discount codes, check if this email has already used this discount in a completed checkout
       const { data: emailCapture, error } = await supabase
         .from('email_captures')
         .select('*')
@@ -59,7 +59,8 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Failed to check discount' }, { status: 500 })
       }
 
-      const hasDiscount = !!emailCapture && !emailCapture.discount_applied
+      // Only consider discount as used if it was applied in a completed checkout
+      const hasDiscount = !!emailCapture && !(emailCapture.discount_applied && emailCapture.order_completed)
 
       return NextResponse.json({
         hasDiscount,
@@ -79,7 +80,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to check discount' }, { status: 500 })
     }
 
-    const hasDiscount = !!emailCapture && !emailCapture.discount_applied
+    // Only consider discount as used if it was applied in a completed checkout
+    const hasDiscount = !!emailCapture && !(emailCapture.discount_applied && emailCapture.order_completed)
 
     return NextResponse.json({
       hasDiscount,

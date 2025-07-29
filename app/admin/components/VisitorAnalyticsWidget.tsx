@@ -139,14 +139,21 @@ export default function VisitorAnalyticsWidget() {
                   <span className="text-gray-600 ml-2">on {activity.page}</span>
                 </div>
                 <span className="text-gray-500">{(() => {
-                  const saDate = new Date(activity.time)
-                  saDate.setHours(saDate.getHours() + 2) // Add 2 hours for SA time
-                  return saDate.toLocaleTimeString('en-US', { 
-                    hour12: true,
-                    hour: 'numeric',
-                    minute: '2-digit',
-                    second: '2-digit'
-                  })
+                  try {
+                    const saDate = new Date(activity.time)
+                    if (isNaN(saDate.getTime())) {
+                      return 'Invalid date'
+                    }
+                    saDate.setHours(saDate.getHours() + 2) // Add 2 hours for SA time
+                    return saDate.toLocaleTimeString('en-US', { 
+                      hour12: true,
+                      hour: 'numeric',
+                      minute: '2-digit',
+                      second: '2-digit'
+                    })
+                  } catch (error) {
+                    return 'Invalid date'
+                  }
                 })()}</span>
               </div>
             ))}

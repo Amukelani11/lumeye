@@ -87,17 +87,8 @@ export async function GET() {
       .limit(10)
 
     const formattedRecentActivity = recentActivity?.map(activity => {
-      const saDate = new Date(activity.created_at)
-      // Add 2 hours for South African time (UTC+2)
-      saDate.setHours(saDate.getHours() + 2)
-      
       return {
-        time: saDate.toLocaleTimeString('en-US', { 
-          hour12: true,
-          hour: 'numeric',
-          minute: '2-digit',
-          second: '2-digit'
-        }),
+        time: activity.created_at, // Return the actual timestamp
         action: activity.action === 'page_view' ? 'Page viewed' : activity.action,
         page: activity.page
       }

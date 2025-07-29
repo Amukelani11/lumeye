@@ -77,15 +77,21 @@ export default function LiveVisitorsWidget() {
   }
 
   const formatTime = (timestamp: string) => {
-    const saDate = new Date(timestamp)
-    // Add 2 hours for South African time (UTC+2)
-    saDate.setHours(saDate.getHours() + 2)
-    
-    return saDate.toLocaleTimeString('en-US', { 
-      hour12: true,
-      hour: 'numeric',
-      minute: '2-digit'
-    })
+    try {
+      const saDate = new Date(timestamp)
+      if (isNaN(saDate.getTime())) {
+        return 'Invalid date'
+      }
+      saDate.setHours(saDate.getHours() + 2) // Add 2 hours for SA time
+      
+      return saDate.toLocaleTimeString('en-US', { 
+        hour12: true,
+        hour: 'numeric',
+        minute: '2-digit'
+      })
+    } catch (error) {
+      return 'Invalid date'
+    }
   }
 
   return (

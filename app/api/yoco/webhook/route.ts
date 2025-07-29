@@ -210,6 +210,38 @@ export async function POST(request: NextRequest) {
             })
           }
           console.log(`Admin sale notifications sent to ${adminUsers.length} admin users`)
+
+          // Mark any reserved discounts as actually used since order is completed
+          if (metadata.email) {
+            const { data: emailCaptures, error: discountError } = await supabase
+              .from('email_captures')
+              .select('*')
+              .eq('email', metadata.email.toLowerCase())
+              .eq('discount_reserved', true)
+
+            if (discountError) {
+              console.error('Error checking for reserved discounts:', discountError)
+            } else if (emailCaptures && emailCaptures.length > 0) {
+              // Mark all reserved discounts as actually used
+              const { error: updateDiscountError } = await supabase
+                .from('email_captures')
+                .update({
+                  discount_applied: true,
+                  discount_reserved: false,
+                  applied_at: new Date().toISOString(),
+                  order_completed: true,
+                  completed_at: new Date().toISOString()
+                })
+                .eq('email', metadata.email.toLowerCase())
+                .eq('discount_reserved', true)
+
+              if (updateDiscountError) {
+                console.error('Error marking discounts as used:', updateDiscountError)
+              } else {
+                console.log(`Marked ${emailCaptures.length} discount(s) as used for email: ${metadata.email}`)
+              }
+            }
+          }
         } catch (emailError) {
           console.error('Error sending emails:', emailError)
         }

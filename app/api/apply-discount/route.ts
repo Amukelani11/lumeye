@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
 
     // For WELCOME10, allow any email to use it (one-time use per email)
     if (discountCode.toUpperCase() === 'WELCOME10') {
-      // Check if this email has already used this discount
+      // Check if this email has already used this discount (only mark as used after checkout completion)
       const { data: emailCapture, error: checkError } = await supabase
         .from('email_captures')
         .select('*')
@@ -38,22 +38,24 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Failed to check discount' }, { status: 500 })
       }
 
-      if (emailCapture && emailCapture.discount_applied) {
+      // Only block if discount was actually used in a completed checkout
+      if (emailCapture && emailCapture.discount_applied && emailCapture.order_completed) {
         return NextResponse.json({ 
           success: false, 
           error: 'Discount code has already been used' 
         })
       }
 
-      // If email doesn't exist in captures, create a new record
+      // If email doesn't exist in captures, create a new record with discount reserved
       if (!emailCapture) {
         const { data: newCapture, error: createError } = await supabase
           .from('email_captures')
           .insert({
             email: email.toLowerCase(),
             discount_code: discountCode.toUpperCase(),
-            discount_applied: true,
-            applied_at: new Date().toISOString(),
+            discount_applied: false, // Don't mark as applied yet
+            discount_reserved: true, // Mark as reserved for this session
+            reserved_at: new Date().toISOString(),
             source: 'manual_entry'
           })
           .select()
@@ -64,17 +66,17 @@ export async function POST(request: NextRequest) {
           return NextResponse.json({ error: 'Failed to apply discount' }, { status: 500 })
         }
       } else {
-        // Mark existing discount as applied
+        // Update existing record to reserve the discount for this session
         const { error: updateError } = await supabase
           .from('email_captures')
           .update({ 
-            discount_applied: true,
-            applied_at: new Date().toISOString()
+            discount_reserved: true,
+            reserved_at: new Date().toISOString()
           })
           .eq('id', emailCapture.id)
 
         if (updateError) {
-          console.error('Error applying discount:', updateError)
+          console.error('Error reserving discount:', updateError)
           return NextResponse.json({ error: 'Failed to apply discount' }, { status: 500 })
         }
       }
@@ -99,24 +101,25 @@ export async function POST(request: NextRequest) {
         })
       }
 
-      if (emailCapture.discount_applied) {
+      // Only block if discount was actually used in a completed checkout
+      if (emailCapture.discount_applied && emailCapture.order_completed) {
         return NextResponse.json({ 
           success: false, 
           error: 'Discount code has already been used' 
         })
       }
 
-      // Mark discount as applied
+      // Reserve the discount for this session
       const { error: updateError } = await supabase
         .from('email_captures')
         .update({ 
-          discount_applied: true,
-          applied_at: new Date().toISOString()
+          discount_reserved: true,
+          reserved_at: new Date().toISOString()
         })
         .eq('id', emailCapture.id)
 
       if (updateError) {
-        console.error('Error applying discount:', updateError)
+        console.error('Error reserving discount:', updateError)
         return NextResponse.json({ error: 'Failed to apply discount' }, { status: 500 })
       }
     }

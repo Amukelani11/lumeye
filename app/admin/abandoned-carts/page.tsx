@@ -271,16 +271,23 @@ export default function AbandonedCartsPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {(() => {
-                          const saDate = new Date(cart.abandoned_at)
-                          saDate.setHours(saDate.getHours() + 2) // Add 2 hours for SA time
-                          return saDate.toLocaleString('en-US', { 
-                            year: 'numeric',
-                            month: '2-digit',
-                            day: '2-digit',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                            second: '2-digit'
-                          })
+                          try {
+                            const saDate = new Date(cart.abandoned_at)
+                            if (isNaN(saDate.getTime())) {
+                              return 'Invalid date'
+                            }
+                            saDate.setHours(saDate.getHours() + 2) // Add 2 hours for SA time
+                            return saDate.toLocaleString('en-US', { 
+                              year: 'numeric',
+                              month: '2-digit',
+                              day: '2-digit',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                              second: '2-digit'
+                            })
+                          } catch (error) {
+                            return 'Invalid date'
+                          }
                         })()}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">

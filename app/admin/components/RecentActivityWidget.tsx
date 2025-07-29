@@ -15,16 +15,23 @@ export default function RecentActivityWidget() {
         
         // Format the activities for display with hardcoded South African timezone
         const formattedActivities = data.recentActivity?.map((activity: any) => {
-          const saDate = new Date(activity.time)
-          saDate.setHours(saDate.getHours() + 2) // Add 2 hours for SA time
-          const timestamp = saDate.toLocaleTimeString('en-US', { 
-            hour12: true,
-            hour: 'numeric',
-            minute: '2-digit',
-            second: '2-digit'
-          })
-          
-          return `${activity.action} on ${activity.page} at ${timestamp}`
+          try {
+            const saDate = new Date(activity.time)
+            if (isNaN(saDate.getTime())) {
+              return `${activity.action} on ${activity.page} at Invalid date`
+            }
+            saDate.setHours(saDate.getHours() + 2) // Add 2 hours for SA time
+            const timestamp = saDate.toLocaleTimeString('en-US', { 
+              hour12: true,
+              hour: 'numeric',
+              minute: '2-digit',
+              second: '2-digit'
+            })
+            
+            return `${activity.action} on ${activity.page} at ${timestamp}`
+          } catch (error) {
+            return `${activity.action} on ${activity.page} at Invalid date`
+          }
         }) || []
         
         setActivities(formattedActivities)
