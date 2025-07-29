@@ -139,6 +139,21 @@ export interface AdminSaleNotificationData {
   adminEmail: string
 }
 
+export interface FailedPaymentData {
+  customerEmail: string
+  customerName?: string
+  orderNumber?: string
+  totalAmount: number
+  items: Array<{
+    name: string
+    quantity: number
+    price: number
+  }>
+  paymentMethod: string
+  retryUrl: string
+  errorMessage?: string
+}
+
 export class EmailService {
   private static fromEmail = process.env.RESEND_FROM_EMAIL || 'hello@lumeye.co.za'
   private static fromName = 'Lumeye'
@@ -765,6 +780,91 @@ export class EmailService {
     })
   }
 
+  static async sendFailedPaymentEmail(data: FailedPaymentData) {
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Payment Failed - Lumeye</title>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
+          .alert { background: #fef2f2; border: 2px solid #fecaca; padding: 20px; border-radius: 8px; margin: 20px 0; }
+          .order-items { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; }
+          .item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
+          .item:last-child { border-bottom: none; }
+          .total { font-weight: bold; font-size: 18px; margin-top: 20px; padding-top: 20px; border-top: 2px solid #ef4444; text-align: right; }
+          .button { display: inline-block; background: #ef4444; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 20px 0; }
+          .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
+          .help { background: #f0f9ff; border: 1px solid #0ea5e9; padding: 15px; border-radius: 8px; margin: 20px 0; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>❌ Payment Failed</h1>
+            <p>Hi ${data.customerName || 'there'}!</p>
+          </div>
+          
+          <div class="content">
+            <div class="alert">
+              <h3>⚠️ Payment Unsuccessful</h3>
+              <p>We're sorry, but your payment for your Lumeye order was not successful. This could be due to insufficient funds, incorrect card details, or other payment issues.</p>
+              ${data.errorMessage ? `<p><strong>Error:</strong> ${data.errorMessage}</p>` : ''}
+            </div>
+            
+            <div class="order-items">
+              <h3>Your Order Items:</h3>
+              ${data.items.map(item => `
+                <div class="item">
+                  <span>${item.name} (Qty: ${item.quantity})</span>
+                  <span>R${item.price.toFixed(2)}</span>
+                </div>
+              `).join('')}
+              <div class="total">
+                <strong>Total: R${data.totalAmount.toFixed(2)}</strong>
+              </div>
+            </div>
+
+            <div class="help">
+              <h3>💡 How to Fix This</h3>
+              <ul>
+                <li>Check that your card details are correct</li>
+                <li>Ensure you have sufficient funds in your account</li>
+                <li>Try using a different payment method</li>
+                <li>Contact your bank if the issue persists</li>
+              </ul>
+            </div>
+
+            <div style="text-align: center;">
+              <a href="${data.retryUrl}" class="button">Try Payment Again</a>
+            </div>
+
+            <p style="text-align: center; color: #666; font-size: 14px;">
+              Your items are still reserved for you. Click the button above to try your payment again.
+            </p>
+          </div>
+
+          <div class="footer">
+            <p>If you continue to have issues, please contact us at hello@lumeye.co.za</p>
+            <p>We're here to help! 💖</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `
+
+    return this.sendEmail({
+      to: data.customerEmail,
+      subject: '❌ Payment Failed - Please Try Again',
+      html
+    })
+  }
+
   static async sendAdminSaleNotification(data: AdminSaleNotificationData) {
     const html = `
       <!DOCTYPE html>
@@ -960,4 +1060,4 @@ export class EmailService {
       html
     })
   }
-} 
+}

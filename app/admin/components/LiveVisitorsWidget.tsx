@@ -76,6 +76,15 @@ export default function LiveVisitorsWidget() {
     return `${Math.floor(diffInSeconds / 3600)}h ago`
   }
 
+  const formatTime = (timestamp: string) => {
+    return new Date(timestamp).toLocaleTimeString('en-US', { 
+      timeZone: 'Africa/Johannesburg',
+      hour12: true,
+      hour: 'numeric',
+      minute: '2-digit'
+    })
+  }
+
   return (
     <div className="bg-white rounded-2xl shadow p-6">
       <div className="flex items-center justify-between mb-4">

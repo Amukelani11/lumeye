@@ -1,8 +1,9 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Users, Eye, TrendingUp, Clock } from "lucide-react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../components/ui/card"
+import { Users, Eye, Clock, TrendingUp, BarChart3 } from "lucide-react"
+import { formatSATimeOnly } from "@/lib/utils"
 
 interface VisitorData {
   activeVisitors: number
@@ -137,7 +138,7 @@ export default function VisitorAnalyticsWidget() {
                   <span className="font-medium">{activity.action}</span>
                   <span className="text-gray-600 ml-2">on {activity.page}</span>
                 </div>
-                <span className="text-gray-500">{activity.time}</span>
+                <span className="text-gray-500">{formatSATimeOnly(activity.time)}</span>
               </div>
             ))}
           </div>

@@ -8,6 +8,21 @@ export async function POST(
 ) {
   try {
     const cartId = params.id
+    console.log('Sending abandoned cart email for cart ID:', cartId)
+
+    // Check email service configuration first
+    if (!process.env.RESEND_API_KEY) {
+      console.error('RESEND_API_KEY is not configured')
+      return NextResponse.json({ 
+        error: 'Email service not configured', 
+        details: 'Please set RESEND_API_KEY environment variable on your server',
+        config: {
+          resendApiKey: false,
+          resendFromEmail: process.env.RESEND_FROM_EMAIL || 'Not set',
+          nodeEnv: process.env.NODE_ENV || 'Not set'
+        }
+      }, { status: 500 })
+    }
 
     // Fetch abandoned cart details
     const { data: cart, error: cartError } = await supabase
@@ -22,30 +37,46 @@ export async function POST(
     }
 
     if (!cart.email) {
+      console.error('No email address available for cart:', cartId)
       return NextResponse.json({ error: 'No email address available for this cart' }, { status: 400 })
     }
+
+    console.log('Sending email to:', cart.email)
 
     // Generate recovery URL
     const recoveryUrl = `${process.env.NEXT_PUBLIC_YOCO_BASE_URL || 'http://localhost:3000'}/cart?session=${cart.session_id}`
 
     // Send abandoned cart email
-    await EmailService.sendAbandonedCartEmail({
+    const emailResult = await EmailService.sendAbandonedCartEmail({
       customerEmail: cart.email,
       cartItems: Array.isArray(cart.cart_data) ? cart.cart_data.map((item: any) => ({
-        name: item.product_name || 'Lumeye Under Eye Serum',
-        quantity: item.quantity,
-        price: item.unit_price,
-        image: item.product_image
+        name: item.product_name || item.name || 'Lumeye Under Eye Serum',
+        quantity: item.quantity || 1,
+        price: item.unit_price || item.price || 0,
+        image: item.product_image || item.image
       })) : [],
       totalValue: cart.total_value,
       recoveryUrl: recoveryUrl
     })
 
+    if (!emailResult.success) {
+      console.error('Failed to send email:', emailResult.error)
+      return NextResponse.json({ 
+        error: 'Failed to send email', 
+        details: emailResult.error,
+        config: {
+          resendApiKey: !!process.env.RESEND_API_KEY,
+          resendFromEmail: process.env.RESEND_FROM_EMAIL || 'Not set',
+          nodeEnv: process.env.NODE_ENV || 'Not set'
+        }
+      }, { status: 500 })
+    }
+
     // Update email sent count and timestamp
     const { error: updateError } = await supabase
       .from('abandoned_carts')
       .update({
-        email_sent_count: cart.email_sent_count + 1,
+        email_sent_count: (cart.email_sent_count || 0) + 1,
         email_sent_at: new Date().toISOString()
       })
       .eq('id', cartId)
@@ -55,12 +86,22 @@ export async function POST(
       // Don't fail the request if update fails
     }
 
+    console.log('Abandoned cart email sent successfully to:', cart.email)
+
     return NextResponse.json({ 
       success: true, 
       message: 'Abandoned cart email sent successfully' 
     })
   } catch (error) {
     console.error('Error sending abandoned cart email:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ 
+      error: 'Internal server error',
+      details: error instanceof Error ? error.message : 'Unknown error',
+      config: {
+        resendApiKey: !!process.env.RESEND_API_KEY,
+        resendFromEmail: process.env.RESEND_FROM_EMAIL || 'Not set',
+        nodeEnv: process.env.NODE_ENV || 'Not set'
+      }
+    }, { status: 500 })
   }
 } 

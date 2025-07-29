@@ -7,7 +7,7 @@ export async function GET() {
     const { data: abandonedCarts, error: abandonedCartsError } = await supabase
       .from('abandoned_carts')
       .select('*')
-      .order('last_cart_activity', { ascending: false })
+      .order('abandoned_at', { ascending: false })
 
     if (abandonedCartsError) {
       console.error('Error fetching abandoned carts:', abandonedCartsError)
@@ -19,15 +19,14 @@ export async function GET() {
       id: cart.id,
       session_id: cart.session_id,
       email: cart.email,
-      cart_data: cart.items || [],
-      total_value: cart.cart_value || 0,
-      items_count: cart.items ? (Array.isArray(cart.items) ? cart.items.length : 1) : 0,
-      abandoned_at: cart.last_cart_activity,
-      recovered_at: cart.converted_at,
-      email_sent_at: cart.captured_at,
-      email_sent_count: cart.email ? 1 : 0,
-      is_recovered: cart.status === 'converted',
-      status: cart.status
+      cart_data: cart.cart_data || [],
+      total_value: cart.total_value || 0,
+      items_count: cart.items_count || 0,
+      abandoned_at: cart.abandoned_at,
+      recovered_at: cart.recovered_at,
+      email_sent_at: cart.email_sent_at,
+      email_sent_count: cart.email_sent_count || 0,
+      is_recovered: cart.is_recovered || false
     }))
 
     return NextResponse.json({ abandonedCarts: transformedCarts })

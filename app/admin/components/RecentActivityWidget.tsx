@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { formatSATimeOnly } from "@/lib/utils"
 
 export default function RecentActivityWidget() {
   const [activities, setActivities] = useState<string[]>([])
@@ -9,24 +10,14 @@ export default function RecentActivityWidget() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('/api/admin/analytics')
+        const response = await fetch('/api/admin/visitor-analytics')
         const data = await response.json()
         
-        // Format the activities for display
+        // Format the activities for display with South African timezone
         const formattedActivities = data.recentActivity?.map((activity: any) => {
-          const timestamp = new Date(activity.timestamp).toLocaleTimeString()
-          const user = activity.user || 'Anonymous'
+          const timestamp = formatSATimeOnly(activity.time)
           
-          switch (activity.type) {
-            case 'cart_updated':
-              return `${user} updated cart at ${timestamp}`
-            case 'purchase_completed':
-              return `${user} completed purchase at ${timestamp}`
-            case 'order_created':
-              return `${user} started checkout at ${timestamp}`
-            default:
-              return `${user} performed action at ${timestamp}`
-          }
+          return `${activity.action} on ${activity.page} at ${timestamp}`
         }) || []
         
         setActivities(formattedActivities)

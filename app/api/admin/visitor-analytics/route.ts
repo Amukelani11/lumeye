@@ -87,7 +87,13 @@ export async function GET() {
       .limit(10)
 
     const formattedRecentActivity = recentActivity?.map(activity => ({
-      time: new Date(activity.created_at).toLocaleTimeString(),
+      time: new Date(activity.created_at).toLocaleTimeString('en-US', { 
+        timeZone: 'Africa/Johannesburg',
+        hour12: true,
+        hour: 'numeric',
+        minute: '2-digit',
+        second: '2-digit'
+      }),
       action: activity.action === 'page_view' ? 'Page viewed' : activity.action,
       page: activity.page
     })) || []

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import Sidebar from "../components/Sidebar"
 import { Search, Mail, Eye, RefreshCw, Calendar, ShoppingCart } from "lucide-react"
+import { formatSATime } from "../../../lib/utils"
 
 interface AbandonedCart {
   id: string
@@ -49,11 +50,41 @@ export default function AbandonedCartsPage() {
       })
 
       if (response.ok) {
+        const result = await response.json()
         alert('Abandoned cart email sent successfully!')
         await fetchAbandonedCarts() // Refresh the list
+      } else {
+        const errorData = await response.json()
+        alert(`Error sending email: ${errorData.error || errorData.details || 'Unknown error'}`)
       }
     } catch (error) {
       console.error('Error sending email:', error)
+      alert('Error sending email. Please check the console for details.')
+    }
+  }
+
+  const testEmail = async (email: string) => {
+    try {
+      const response = await fetch('/api/test-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: email,
+          type: 'abandoned_cart'
+        }),
+      })
+
+      if (response.ok) {
+        alert('Test email sent successfully!')
+      } else {
+        const errorData = await response.json()
+        alert(`Error sending test email: ${errorData.error || 'Unknown error'}`)
+      }
+    } catch (error) {
+      console.error('Error sending test email:', error)
+      alert('Error sending test email. Please check the console for details.')
     }
   }
 
@@ -239,7 +270,7 @@ export default function AbandonedCartsPage() {
                         R{cart.total_value.toFixed(2)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {getTimeSinceAbandoned(cart.abandoned_at)}
+                        {formatSATime(cart.abandoned_at)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
@@ -259,6 +290,15 @@ export default function AbandonedCartsPage() {
                               onClick={() => sendAbandonedCartEmail(cart.id)}
                               className="text-blue-600 hover:text-blue-900 flex items-center"
                               title="Send Recovery Email"
+                            >
+                              <Mail className="w-4 h-4" />
+                            </button>
+                          )}
+                          {cart.email && (
+                            <button
+                              onClick={() => testEmail(cart.email!)}
+                              className="text-green-600 hover:text-green-900 flex items-center"
+                              title="Send Test Email"
                             >
                               <Mail className="w-4 h-4" />
                             </button>

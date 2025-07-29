@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import Sidebar from "../components/Sidebar"
 import { Search, Mail, Eye, RefreshCw, Calendar, CreditCard } from "lucide-react"
+import { formatSATime } from "../../../lib/utils"
 
 interface CheckoutAbandonment {
   id: string
@@ -49,11 +50,41 @@ export default function CheckoutAbandonmentsPage() {
       })
 
       if (response.ok) {
+        const result = await response.json()
         alert('Checkout abandonment email sent successfully!')
         await fetchCheckoutAbandonments() // Refresh the list
+      } else {
+        const errorData = await response.json()
+        alert(`Error sending email: ${errorData.error || errorData.details || 'Unknown error'}`)
       }
     } catch (error) {
       console.error('Error sending email:', error)
+      alert('Error sending email. Please check the console for details.')
+    }
+  }
+
+  const testEmail = async (email: string) => {
+    try {
+      const response = await fetch('/api/test-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: email,
+          type: 'checkout_abandonment'
+        }),
+      })
+
+      if (response.ok) {
+        alert('Test email sent successfully!')
+      } else {
+        const errorData = await response.json()
+        alert(`Error sending test email: ${errorData.error || 'Unknown error'}`)
+      }
+    } catch (error) {
+      console.error('Error sending test email:', error)
+      alert('Error sending test email. Please check the console for details.')
     }
   }
 
@@ -235,7 +266,7 @@ export default function CheckoutAbandonmentsPage() {
                         R{abandonment.total_value.toFixed(2)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {getTimeSinceAbandoned(abandonment.abandoned_at)}
+                        {formatSATime(abandonment.abandoned_at)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
@@ -257,6 +288,13 @@ export default function CheckoutAbandonmentsPage() {
                               <Mail className="w-4 h-4" />
                             </button>
                           )}
+                          <button
+                            onClick={() => testEmail(abandonment.email)}
+                            className="text-green-600 hover:text-green-900 flex items-center"
+                            title="Send Test Email"
+                          >
+                            <Mail className="w-4 h-4" />
+                          </button>
                           <button
                             onClick={() => window.open(`/checkout?session=${abandonment.session_id}`, '_blank')}
                             className="text-gray-600 hover:text-gray-900 flex items-center"

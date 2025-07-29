@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react"
 import Sidebar from "../components/Sidebar"
-import { Search, Mail, Download, Filter, Calendar, Users, Tag, Eye } from "lucide-react"
+import { Search, Mail, Download, Filter, Calendar, Users, Tag, Eye, AlertTriangle } from "lucide-react"
+import { formatSATime } from "../../../lib/utils"
 
 interface EmailCapture {
   id: number
@@ -40,6 +41,7 @@ export default function EmailCapturesPage() {
     thisWeek: 0,
     thisMonth: 0
   })
+  const [sendingEmail, setSendingEmail] = useState<string | null>(null)
 
   useEffect(() => {
     fetchEmailCaptures()
@@ -57,6 +59,88 @@ export default function EmailCapturesPage() {
       console.error('Error fetching email captures:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const sendFailedPaymentEmail = async (emailCapture: EmailCapture) => {
+    setSendingEmail(emailCapture.email)
+    try {
+      const response = await fetch(`/api/admin/email-captures/${emailCapture.id}/send-failed-payment`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          items: [{
+            name: 'Lumeye Under Eye Serum',
+            quantity: 1,
+            price: 299.00
+          }],
+          totalAmount: 299.00,
+          paymentMethod: 'Credit Card',
+          errorMessage: 'Payment was declined. Please check your card details and try again.'
+        }),
+      })
+
+      if (response.ok) {
+        alert('Failed payment email sent successfully!')
+        await fetchEmailCaptures() // Refresh the list
+      } else {
+        const errorData = await response.json()
+        alert(`Error sending email: ${errorData.error || errorData.details || 'Unknown error'}`)
+      }
+    } catch (error) {
+      console.error('Error sending failed payment email:', error)
+      alert('Error sending email. Please try again.')
+    } finally {
+      setSendingEmail(null)
+    }
+  }
+
+  const testEmail = async (emailCapture: EmailCapture) => {
+    setSendingEmail(emailCapture.email)
+    try {
+      const response = await fetch('/api/test-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: emailCapture.email,
+          type: 'failed_payment'
+        }),
+      })
+
+      if (response.ok) {
+        alert('Test email sent successfully!')
+      } else {
+        const errorData = await response.json()
+        alert(`Error sending test email: ${errorData.error || 'Unknown error'}`)
+      }
+    } catch (error) {
+      console.error('Error sending test email:', error)
+      alert('Error sending test email. Please try again.')
+    } finally {
+      setSendingEmail(null)
+    }
+  }
+
+  const checkEmailStatus = async () => {
+    try {
+      const response = await fetch('/api/email-status')
+      if (response.ok) {
+        const data = await response.json()
+        if (data.config.resendApiKey) {
+          alert('✅ Email service is configured correctly!')
+        } else {
+          alert('❌ Email service is not configured. Please set RESEND_API_KEY environment variable.')
+        }
+      } else {
+        alert('❌ Error checking email service status')
+      }
+    } catch (error) {
+      console.error('Error checking email status:', error)
+      alert('❌ Error checking email service status')
     }
   }
 
@@ -252,6 +336,13 @@ export default function EmailCapturesPage() {
               <Download className="w-4 h-4 mr-2" />
               Export CSV
             </button>
+            <button
+              onClick={checkEmailStatus}
+              className="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg flex items-center"
+            >
+              <AlertTriangle className="w-4 h-4 mr-2" />
+              Check Email Status
+            </button>
           </div>
         </div>
 
@@ -310,16 +401,40 @@ export default function EmailCapturesPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(emailCapture.created_at).toLocaleDateString()} {new Date(emailCapture.created_at).toLocaleTimeString()}
+                        {formatSATime(emailCapture.created_at)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex space-x-2">
                           <button
                             onClick={() => window.open(`mailto:${emailCapture.email}`, '_blank')}
                             className="text-blue-600 hover:text-blue-900 flex items-center"
-                            title="Send Email"
+                            title="Open Email Client"
                           >
                             <Mail className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => sendFailedPaymentEmail(emailCapture)}
+                            disabled={sendingEmail === emailCapture.email}
+                            className="text-red-600 hover:text-red-900 flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Send Failed Payment Email"
+                          >
+                            {sendingEmail === emailCapture.email ? (
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>
+                            ) : (
+                              <AlertTriangle className="w-4 h-4" />
+                            )}
+                          </button>
+                          <button
+                            onClick={() => testEmail(emailCapture)}
+                            disabled={sendingEmail === emailCapture.email}
+                            className="text-purple-600 hover:text-purple-900 flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Send Test Email"
+                          >
+                            {sendingEmail === emailCapture.email ? (
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-purple-600"></div>
+                            ) : (
+                              <Mail className="w-4 h-4" />
+                            )}
                           </button>
                           {emailCapture.session_id && (
                             <button
