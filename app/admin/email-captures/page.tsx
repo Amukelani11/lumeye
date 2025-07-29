@@ -1,26 +1,45 @@
 "use client"
 
-import { useState, useEffect } from 'react'
-import { Mail, Download, Filter, Search } from 'lucide-react'
-import Link from 'next/link'
+import { useState, useEffect } from "react"
+import Sidebar from "../components/Sidebar"
+import { Search, Mail, Download, Filter, Calendar, Users, Tag, Eye } from "lucide-react"
 
 interface EmailCapture {
   id: number
   email: string
-  session_id: string
-  discount_code: string
-  discount_applied: boolean
-  applied_at: string | null
-  source: string
+  source: string // 'discount_popup', 'checkout', 'newsletter', 'abandoned_cart'
+  session_id?: string
   created_at: string
+  metadata?: any
+  status?: string
+}
+
+interface EmailStats {
+  total: number
+  fromDiscount: number
+  fromCheckout: number
+  fromNewsletter: number
+  fromAbandonedCart: number
+  today: number
+  thisWeek: number
+  thisMonth: number
 }
 
 export default function EmailCapturesPage() {
   const [emailCaptures, setEmailCaptures] = useState<EmailCapture[]>([])
   const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [filterSource, setFilterSource] = useState('all')
-  const [filterApplied, setFilterApplied] = useState('all')
+  const [searchTerm, setSearchTerm] = useState("")
+  const [filter, setFilter] = useState("all")
+  const [stats, setStats] = useState<EmailStats>({
+    total: 0,
+    fromDiscount: 0,
+    fromCheckout: 0,
+    fromNewsletter: 0,
+    fromAbandonedCart: 0,
+    today: 0,
+    thisWeek: 0,
+    thisMonth: 0
+  })
 
   useEffect(() => {
     fetchEmailCaptures()
@@ -29,38 +48,28 @@ export default function EmailCapturesPage() {
   const fetchEmailCaptures = async () => {
     try {
       const response = await fetch('/api/admin/email-captures')
-      const data = await response.json()
-      setEmailCaptures(data.emailCaptures || [])
+      if (response.ok) {
+        const data = await response.json()
+        setEmailCaptures(data.emailCaptures || [])
+        setStats(data.stats || {})
+      }
     } catch (error) {
-      console.error('Failed to fetch email captures:', error)
+      console.error('Error fetching email captures:', error)
     } finally {
       setLoading(false)
     }
   }
 
-  const filteredCaptures = emailCaptures.filter(capture => {
-    const matchesSearch = capture.email.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesSource = filterSource === 'all' || capture.source === filterSource
-    const matchesApplied = filterApplied === 'all' || 
-      (filterApplied === 'applied' && capture.discount_applied) ||
-      (filterApplied === 'not_applied' && !capture.discount_applied)
-    
-    return matchesSearch && matchesSource && matchesApplied
-  })
-
-  const exportToCSV = () => {
-    const headers = ['Email', 'Source', 'Discount Code', 'Applied', 'Applied At', 'Created At']
+  const exportEmails = () => {
     const csvContent = [
-      headers.join(','),
-      ...filteredCaptures.map(capture => [
+      ['Email', 'Source', 'Date', 'Session ID'],
+      ...emailCaptures.map(capture => [
         capture.email,
         capture.source,
-        capture.discount_code,
-        capture.discount_applied ? 'Yes' : 'No',
-        capture.applied_at || '',
-        new Date(capture.created_at).toLocaleDateString()
-      ].join(','))
-    ].join('\n')
+        new Date(capture.created_at).toLocaleDateString(),
+        capture.session_id || ''
+      ])
+    ].map(row => row.join(',')).join('\n')
 
     const blob = new Blob([csvContent], { type: 'text/csv' })
     const url = window.URL.createObjectURL(blob)
@@ -71,191 +80,276 @@ export default function EmailCapturesPage() {
     window.URL.revokeObjectURL(url)
   }
 
-  const stats = {
-    total: emailCaptures.length,
-    applied: emailCaptures.filter(c => c.discount_applied).length,
-    notApplied: emailCaptures.filter(c => !c.discount_applied).length,
-    popup: emailCaptures.filter(c => c.source === 'popup').length,
-    checkout: emailCaptures.filter(c => c.source === 'checkout').length,
-    cart: emailCaptures.filter(c => c.source === 'cart').length
+  const filteredEmails = emailCaptures.filter(email => {
+    const matchesSearch = email.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         email.session_id?.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesFilter = filter === 'all' || email.source === filter
+    return matchesSearch && matchesFilter
+  })
+
+  const getSourceIcon = (source: string) => {
+    switch (source) {
+      case 'discount_popup':
+        return <Tag className="w-4 h-4 text-blue-600" />
+      case 'checkout':
+        return <Mail className="w-4 h-4 text-green-600" />
+      case 'newsletter':
+        return <Users className="w-4 h-4 text-purple-600" />
+      case 'abandoned_cart':
+        return <Calendar className="w-4 h-4 text-orange-600" />
+      default:
+        return <Mail className="w-4 h-4 text-gray-600" />
+    }
   }
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-600"></div>
-      </div>
-    )
+  const getSourceLabel = (source: string) => {
+    switch (source) {
+      case 'discount_popup':
+        return 'Discount Popup'
+      case 'checkout':
+        return 'Checkout Form'
+      case 'newsletter':
+        return 'Newsletter Signup'
+      case 'abandoned_cart':
+        return 'Abandoned Cart'
+      default:
+        return source
+    }
+  }
+
+  const getSourceColor = (source: string) => {
+    switch (source) {
+      case 'discount_popup':
+        return 'bg-blue-100 text-blue-800'
+      case 'checkout':
+        return 'bg-green-100 text-green-800'
+      case 'newsletter':
+        return 'bg-purple-100 text-purple-800'
+      case 'abandoned_cart':
+        return 'bg-orange-100 text-orange-800'
+      default:
+        return 'bg-gray-100 text-gray-800'
+    }
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-gray-50 flex flex-col lg:flex-row">
+      <Sidebar />
+      <main className="flex-1 p-4 sm:p-8">
         <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Email Captures</h1>
-              <p className="text-gray-600 mt-2">Manage email captures for 10% discount</p>
-            </div>
-            <Link href="/admin" className="text-pink-600 hover:text-pink-700">
-              ← Back to Dashboard
-            </Link>
-          </div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Email Captures</h1>
+          <p className="text-gray-600">Track all email captures from various sources</p>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-8">
-          <div className="bg-white rounded-lg p-4 shadow">
-            <div className="text-2xl font-bold text-gray-900">{stats.total}</div>
-            <div className="text-sm text-gray-600">Total Captures</div>
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 mb-6">
+          <div className="bg-white rounded-lg shadow p-4">
+            <div className="flex items-center">
+              <Mail className="w-6 h-6 text-pink-600" />
+              <div className="ml-3">
+                <p className="text-xs font-medium text-gray-600">Total</p>
+                <p className="text-lg font-bold text-gray-900">{stats.total}</p>
+              </div>
+            </div>
           </div>
-          <div className="bg-white rounded-lg p-4 shadow">
-            <div className="text-2xl font-bold text-green-600">{stats.applied}</div>
-            <div className="text-sm text-gray-600">Applied</div>
+          <div className="bg-white rounded-lg shadow p-4">
+            <div className="flex items-center">
+              <Tag className="w-6 h-6 text-blue-600" />
+              <div className="ml-3">
+                <p className="text-xs font-medium text-gray-600">Discount</p>
+                <p className="text-lg font-bold text-gray-900">{stats.fromDiscount}</p>
+              </div>
+            </div>
           </div>
-          <div className="bg-white rounded-lg p-4 shadow">
-            <div className="text-2xl font-bold text-orange-600">{stats.notApplied}</div>
-            <div className="text-sm text-gray-600">Not Applied</div>
+          <div className="bg-white rounded-lg shadow p-4">
+            <div className="flex items-center">
+              <Mail className="w-6 h-6 text-green-600" />
+              <div className="ml-3">
+                <p className="text-xs font-medium text-gray-600">Checkout</p>
+                <p className="text-lg font-bold text-gray-900">{stats.fromCheckout}</p>
+              </div>
+            </div>
           </div>
-          <div className="bg-white rounded-lg p-4 shadow">
-            <div className="text-2xl font-bold text-blue-600">{stats.popup}</div>
-            <div className="text-sm text-gray-600">From Popup</div>
+          <div className="bg-white rounded-lg shadow p-4">
+            <div className="flex items-center">
+              <Users className="w-6 h-6 text-purple-600" />
+              <div className="ml-3">
+                <p className="text-xs font-medium text-gray-600">Newsletter</p>
+                <p className="text-lg font-bold text-gray-900">{stats.fromNewsletter}</p>
+              </div>
+            </div>
           </div>
-          <div className="bg-white rounded-lg p-4 shadow">
-            <div className="text-2xl font-bold text-purple-600">{stats.checkout}</div>
-            <div className="text-sm text-gray-600">From Checkout</div>
+          <div className="bg-white rounded-lg shadow p-4">
+            <div className="flex items-center">
+              <Calendar className="w-6 h-6 text-orange-600" />
+              <div className="ml-3">
+                <p className="text-xs font-medium text-gray-600">Abandoned</p>
+                <p className="text-lg font-bold text-gray-900">{stats.fromAbandonedCart}</p>
+              </div>
+            </div>
           </div>
-          <div className="bg-white rounded-lg p-4 shadow">
-            <div className="text-2xl font-bold text-indigo-600">{stats.cart}</div>
-            <div className="text-sm text-gray-600">From Cart</div>
+          <div className="bg-white rounded-lg shadow p-4">
+            <div className="flex items-center">
+              <Calendar className="w-6 h-6 text-indigo-600" />
+              <div className="ml-3">
+                <p className="text-xs font-medium text-gray-600">Today</p>
+                <p className="text-lg font-bold text-gray-900">{stats.today}</p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-white rounded-lg shadow p-4">
+            <div className="flex items-center">
+              <Calendar className="w-6 h-6 text-teal-600" />
+              <div className="ml-3">
+                <p className="text-xs font-medium text-gray-600">This Week</p>
+                <p className="text-lg font-bold text-gray-900">{stats.thisWeek}</p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-white rounded-lg shadow p-4">
+            <div className="flex items-center">
+              <Calendar className="w-6 h-6 text-cyan-600" />
+              <div className="ml-3">
+                <p className="text-xs font-medium text-gray-600">This Month</p>
+                <p className="text-lg font-bold text-gray-900">{stats.thisMonth}</p>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Filters and Search */}
-        <div className="bg-white rounded-lg shadow mb-6 p-6">
-          <div className="flex flex-col md:flex-row gap-4">
+        {/* Filters and Actions */}
+        <div className="bg-white rounded-lg shadow p-6 mb-6">
+          <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
                   type="text"
-                  placeholder="Search by email..."
+                  placeholder="Search by email or session ID..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-600 focus:border-transparent"
                 />
               </div>
             </div>
-            <div className="flex gap-4">
+            <div className="sm:w-48">
               <select
-                value={filterSource}
-                onChange={(e) => setFilterSource(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-600 focus:border-transparent"
               >
                 <option value="all">All Sources</option>
-                <option value="popup">Popup</option>
-                <option value="checkout">Checkout</option>
-                <option value="cart">Cart</option>
+                <option value="discount_popup">Discount Popup</option>
+                <option value="checkout">Checkout Form</option>
+                <option value="newsletter">Newsletter</option>
+                <option value="abandoned_cart">Abandoned Cart</option>
               </select>
-              <select
-                value={filterApplied}
-                onChange={(e) => setFilterApplied(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-              >
-                <option value="all">All Status</option>
-                <option value="applied">Applied</option>
-                <option value="not_applied">Not Applied</option>
-              </select>
-              <button
-                onClick={exportToCSV}
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-              >
-                <Download className="w-4 h-4" />
-                Export CSV
-              </button>
             </div>
+            <button
+              onClick={exportEmails}
+              className="btn-primary flex items-center"
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Export CSV
+            </button>
           </div>
         </div>
 
         {/* Email Captures Table */}
         <div className="bg-white rounded-lg shadow overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Email
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Source
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Discount Code
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Applied At
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Created At
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredCaptures.map((capture) => (
-                  <tr key={capture.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <Mail className="w-4 h-4 text-gray-400 mr-2" />
-                        <span className="text-sm font-medium text-gray-900">{capture.email}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        capture.source === 'popup' ? 'bg-blue-100 text-blue-800' :
-                        capture.source === 'checkout' ? 'bg-purple-100 text-purple-800' :
-                        'bg-indigo-100 text-indigo-800'
-                      }`}>
-                        {capture.source}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {capture.discount_code}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        capture.discount_applied 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-orange-100 text-orange-800'
-                      }`}>
-                        {capture.discount_applied ? 'Applied' : 'Not Applied'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {capture.applied_at 
-                        ? new Date(capture.applied_at).toLocaleDateString()
-                        : '-'
-                      }
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(capture.created_at).toLocaleDateString()}
-                    </td>
+          {loading ? (
+            <div className="p-8 text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-600 mx-auto"></div>
+              <p className="mt-2 text-gray-600">Loading email captures...</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Email
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Source
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Session ID
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Captured
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          
-          {filteredCaptures.length === 0 && (
-            <div className="text-center py-12">
-              <Mail className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600">No email captures found</p>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {filteredEmails.map((emailCapture) => (
+                    <tr key={emailCapture.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium text-gray-900">
+                          {emailCapture.email}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getSourceColor(emailCapture.source)}`}>
+                          {getSourceIcon(emailCapture.source)}
+                          <span className="ml-1">{getSourceLabel(emailCapture.source)}</span>
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">
+                          {emailCapture.session_id ? (
+                            <span className="font-mono text-xs">
+                              {emailCapture.session_id.substring(0, 8)}...
+                            </span>
+                          ) : (
+                            <span className="text-gray-400">No session</span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {new Date(emailCapture.created_at).toLocaleDateString()} {new Date(emailCapture.created_at).toLocaleTimeString()}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => window.open(`mailto:${emailCapture.email}`, '_blank')}
+                            className="text-blue-600 hover:text-blue-900 flex items-center"
+                            title="Send Email"
+                          >
+                            <Mail className="w-4 h-4" />
+                          </button>
+                          {emailCapture.session_id && (
+                            <button
+                              onClick={() => window.open(`/cart?session=${emailCapture.session_id}`, '_blank')}
+                              className="text-gray-600 hover:text-gray-900 flex items-center"
+                              title="View Session"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </div>
-      </div>
+
+        {filteredEmails.length === 0 && !loading && (
+          <div className="text-center py-12">
+            <Mail className="mx-auto h-12 w-12 text-gray-400" />
+            <h3 className="mt-2 text-sm font-medium text-gray-900">No email captures</h3>
+            <p className="mt-1 text-sm text-gray-500">
+              {searchTerm || filter !== 'all' ? 'Try adjusting your search or filters.' : 'No emails have been captured yet.'}
+            </p>
+          </div>
+        )}
+      </main>
     </div>
   )
 } 

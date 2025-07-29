@@ -220,10 +220,10 @@ export default function AbandonedCartsPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900">
-                          {cart.email || 'No email'}
+                          {cart.email || 'No email captured'}
                         </div>
                         <div className="text-sm text-gray-500">
-                          {cart.email_sent_count > 0 ? `${cart.email_sent_count} emails sent` : 'No emails sent'}
+                          {cart.email ? 'Email captured' : 'No email captured'}
                         </div>
                       </td>
                       <td className="px-6 py-4">
