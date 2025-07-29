@@ -31,7 +31,10 @@ export default function Header() {
               Home
             </Link>
             <Link href="/product" className="text-gray-700 hover:text-pink-600 transition-colors">
-              Product
+              Under Eye Serum
+            </Link>
+            <Link href="/glowsmile" className="text-gray-700 hover:text-pink-600 transition-colors">
+              Teeth Whitener
             </Link>
             <Link href="/faq" className="text-gray-700 hover:text-pink-600 transition-colors">
               FAQ
@@ -79,7 +82,14 @@ export default function Header() {
                 className="text-gray-700 hover:text-pink-600 transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Product
+                Under Eye Serum
+              </Link>
+              <Link
+                href="/glowsmile"
+                className="text-gray-700 hover:text-pink-600 transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Teeth Whitener
               </Link>
               <Link
                 href="/faq"

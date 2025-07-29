@@ -42,7 +42,7 @@ export default function CartPage() {
   }
 
   const subtotal = state.total
-  const shipping = subtotal >= 250 ? 0 : 50
+  const shipping = 0 // Free shipping for all orders
   const total = subtotal + shipping
 
   return (
@@ -88,11 +88,10 @@ export default function CartPage() {
               </div>
             </div>
 
-            {subtotal < 250 && (
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-                <p className="text-sm text-yellow-800">Add R{(250 - subtotal).toFixed(2)} more for free shipping!</p>
-              </div>
-            )}
+            {/* Free shipping message */}
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+              <p className="text-sm text-green-800">🎉 Free shipping on all orders!</p>
+            </div>
 
             <Link href="/checkout" className="btn-primary w-full text-center block">
               Proceed to Checkout

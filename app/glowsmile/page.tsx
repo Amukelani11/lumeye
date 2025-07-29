@@ -5,6 +5,8 @@ import { Star, Check, Shield, Truck, Clock, Heart, ArrowRight } from "lucide-rea
 import { Suspense } from "react"
 import GlowSmileTracker from "../components/GlowSmileTracker"
 import GlowSmileProductInfo from "../components/GlowSmileProductInfo"
+import GlowSmileBeforeAfterGallery from "../components/GlowSmileBeforeAfterGallery"
+import GlowSmileReviews from "../components/GlowSmileReviews"
 import EmailCaptureWrapper from "../components/EmailCaptureWrapper"
 
 export const metadata: Metadata = {
@@ -52,7 +54,7 @@ function GlowSmileContent() {
                   priority
                 />
                 <div className="absolute -top-4 -right-4 bg-pink-600 text-white px-4 py-2 rounded-full text-lg font-bold">
-                  R229
+                  R199
                 </div>
                 <div className="absolute -bottom-4 -left-4 bg-purple-600 text-white px-3 py-1 rounded-full text-sm font-medium">
                   New
@@ -264,6 +266,12 @@ function GlowSmileContent() {
           </div>
         </div>
       </section>
+
+      {/* Before & After Gallery */}
+      <GlowSmileBeforeAfterGallery />
+
+      {/* Customer Reviews */}
+      <GlowSmileReviews />
 
       {/* Bundle Offer */}
       <section className="py-20 bg-gradient-to-r from-purple-600 to-pink-600 text-white">

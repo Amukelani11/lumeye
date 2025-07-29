@@ -36,6 +36,10 @@ export function DiscountProvider({ children }: { children: React.ReactNode }) {
       setDiscountCode(code)
       setDiscountApplied(true)
       setDiscountAmount(subtotal * 0.1)
+    } else if (code === 'GLOWDUO') {
+      setDiscountCode(code)
+      setDiscountApplied(true)
+      setDiscountAmount(79) // R79 discount for the bundle
     }
   }
 

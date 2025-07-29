@@ -110,7 +110,12 @@ export default function Footer() {
               </li>
               <li>
                 <Link href="/product" className="text-gray-300 hover:text-pink-400 transition-colors">
-                  Product
+                  Under Eye Serum
+                </Link>
+              </li>
+              <li>
+                <Link href="/glowsmile" className="text-gray-300 hover:text-pink-400 transition-colors">
+                  Teeth Whitener
                 </Link>
               </li>
               <li>

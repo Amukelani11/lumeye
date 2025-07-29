@@ -9,9 +9,8 @@ export default function CheckoutSummary() {
   const { discountApplied, discountAmount, discountCode } = useDiscount()
 
   const subtotal = state.total
-  const shipping = subtotal >= 250 ? 0 : 50
-  const discount = discountApplied ? discountAmount : 0
-  const total = subtotal + shipping - discount
+  const shipping = 0 // Free shipping for all orders
+  const total = subtotal + shipping - (discountApplied ? discountAmount : 0)
 
   return (
     <div className="bg-cool-grey p-8 rounded-2xl h-fit">
@@ -51,10 +50,10 @@ export default function CheckoutSummary() {
             {shipping === 0 ? "Free" : `R${shipping.toFixed(2)}`}
           </span>
         </div>
-        {discountApplied && (
+        {discountApplied && discountAmount > 0 && (
           <div className="flex justify-between text-green-600">
-            <span>Discount ({discountCode})</span>
-            <span>-R{discount.toFixed(2)}</span>
+            <span>Bundle Discount ({discountCode})</span>
+            <span>-R{discountAmount.toFixed(2)}</span>
           </div>
         )}
         <div className="border-t pt-3 flex justify-between font-semibold text-lg text-gray-900">
@@ -63,15 +62,14 @@ export default function CheckoutSummary() {
         </div>
       </div>
 
-      {subtotal < 250 && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mt-6">
-          <p className="text-sm text-yellow-800">Add R{(250 - subtotal).toFixed(2)} more for free shipping!</p>
-        </div>
-      )}
+      {/* Free shipping message */}
+      <div className="bg-green-50 border border-green-200 rounded-lg p-4 mt-6">
+        <p className="text-sm text-green-800">🎉 Free shipping on all orders!</p>
+      </div>
 
       {discountApplied && (
         <div className="bg-green-50 border border-green-200 rounded-lg p-4 mt-6">
-          <p className="text-sm text-green-800">🎉 Your {discountCode} discount has been applied!</p>
+          <p className="text-sm text-green-800">🎉 Your {discountCode === 'GLOWDUO' ? 'Glow Duo Bundle' : discountCode} discount has been applied!</p>
         </div>
       )}
 

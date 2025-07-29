@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
         const subtotal = lineItems.reduce((sum: number, item: any) => {
           return sum + (item.pricingDetails.price * item.quantity / 100) // Convert from cents
         }, 0)
-        const shippingCost = subtotal >= 250 ? 0 : 50
+        const shippingCost = 0 // Free shipping for all orders
         const totalAmount = subtotal + shippingCost
 
         // Create order

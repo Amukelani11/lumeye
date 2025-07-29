@@ -92,7 +92,7 @@ export default function ProductSpotlight() {
                 className="w-full h-auto rounded-2xl"
               />
               <div className="absolute -top-3 -right-3 bg-pink-600 text-white px-4 py-2 rounded-full text-lg font-bold">
-                R229
+                R199
               </div>
             </div>
             

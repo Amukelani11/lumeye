@@ -66,7 +66,7 @@ export default function HeroSection() {
                 Shop Eye Serum - R299
               </Link>
               <Link href="/glowsmile" className="btn-secondary inline-block text-center bg-white border-2 border-purple-600 text-purple-600 hover:bg-purple-50">
-                Shop GlowSmile - R229
+                Shop GlowSmile - R199
               </Link>
             </div>
             
@@ -106,7 +106,7 @@ export default function HeroSection() {
                   className="w-full h-auto rounded-2xl"
                 />
                 <div className="absolute -top-3 -right-3 bg-pink-600 text-white px-3 py-1 rounded-full text-sm font-medium">
-                  R229
+                  R199
                 </div>
                 <div className="absolute -bottom-3 -left-3 bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-medium">
                   Smile Care

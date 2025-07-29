@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
 
     // Calculate totals from the provided items
     const subtotal = items.reduce((sum: number, item: any) => sum + (Number(item.unit_price) * item.quantity), 0)
-    const shippingCost = subtotal >= 250 ? 0 : 50 // Free shipping over R250
+    const shippingCost = 0 // Free shipping for all orders
     const taxAmount = 0 // No VAT as requested
     const discountAmount = 0
     const totalAmount = subtotal + shippingCost + taxAmount - discountAmount

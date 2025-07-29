@@ -21,7 +21,7 @@ export default function GlowSmileProductInfo() {
     trackViewItem({
       item_id: 'lumeye-glowsmile',
       item_name: 'Lumeye GlowSmile - Instant Violet Whitening Drops',
-      price: 229,
+      price: 199,
       currency: 'ZAR',
       quantity: 1
     })
@@ -41,24 +41,24 @@ export default function GlowSmileProductInfo() {
         payload: {
           id: "lumeye-glowsmile",
           name: "Lumeye GlowSmile - Instant Violet Whitening Drops",
-          price: 229,
+          price: 199,
           image: "/lumeye teeth 1.png",
         },
       })
     }
     // Track add to cart event
-    trackAddToCart(229 * quantity, 'ZAR', 'Lumeye GlowSmile')
+    trackAddToCart(199 * quantity, 'ZAR', 'Lumeye GlowSmile')
     gaTrackAddToCart({
       item_id: 'lumeye-glowsmile',
       item_name: 'Lumeye GlowSmile - Instant Violet Whitening Drops',
-      price: 229,
+      price: 199,
       currency: 'ZAR',
       quantity: quantity
     })
     trackActivity({
       action: 'cart_add',
-      cartValue: 229 * quantity,
-      items: [{ name: 'Lumeye GlowSmile - Instant Violet Whitening Drops', quantity, price: 229 }]
+      cartValue: 199 * quantity,
+      items: [{ name: 'Lumeye GlowSmile - Instant Violet Whitening Drops', quantity, price: 199 }]
     })
     // Reset quantity after adding to cart
     setQuantity(1)
@@ -71,30 +71,30 @@ export default function GlowSmileProductInfo() {
       payload: {
         id: "lumeye-glowsmile",
         name: "Lumeye GlowSmile - Instant Violet Whitening Drops",
-        price: 229,
+        price: 199,
         image: "/lumeye teeth 1.png",
         quantity: quantity,
       },
     })
     // Track initiate checkout event
-    trackInitiateCheckout(229 * quantity, 'ZAR')
+    trackInitiateCheckout(199 * quantity, 'ZAR')
     gaTrackBeginCheckout([{
       item_id: 'lumeye-glowsmile',
       item_name: 'Lumeye GlowSmile - Instant Violet Whitening Drops',
-      price: 229,
+      price: 199,
       quantity: quantity
     }], 'ZAR')
     trackActivity({
       action: 'checkout_start',
-      cartValue: 229 * quantity,
-      items: [{ name: 'Lumeye GlowSmile - Instant Violet Whitening Drops', quantity, price: 229 }]
+      cartValue: 199 * quantity,
+      items: [{ name: 'Lumeye GlowSmile - Instant Violet Whitening Drops', quantity, price: 199 }]
     })
     // Navigate to checkout
     router.push('/checkout')
   }
 
   const originalPrice = 399 // Compared at price
-  const currentPrice = 229
+  const currentPrice = 199
   const savings = originalPrice - currentPrice
   const savingsPercentage = Math.round((savings / originalPrice) * 100)
 
@@ -136,14 +136,14 @@ export default function GlowSmileProductInfo() {
             <div className="w-16 h-16 bg-white rounded-lg border-2 border-pink-300 flex items-center justify-center">
               <div className="w-8 h-8 bg-pink-200 rounded"></div>
             </div>
-            <span className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs font-medium">R229</span>
+            <span className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs font-medium">R199</span>
           </div>
           <span className="text-2xl font-bold text-gray-400">+</span>
           <div className="relative">
             <div className="w-16 h-16 bg-white rounded-lg border-2 border-pink-300 flex items-center justify-center">
               <div className="w-8 h-8 bg-pink-200 rounded"></div>
             </div>
-            <span className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs font-medium">R229</span>
+            <span className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs font-medium">R199</span>
           </div>
           <span className="text-2xl font-bold text-gray-400">=</span>
           <div className="relative">

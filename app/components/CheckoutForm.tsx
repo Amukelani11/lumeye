@@ -200,7 +200,7 @@ export default function CheckoutForm() {
       const subtotal = state.total
       const discount = discountApplied ? discountAmount : 0
       const discountedSubtotal = subtotal - discount
-      const shipping = discountedSubtotal >= 250 ? 0 : 50
+      const shipping = 0 // Free shipping for all orders
       const total = discountedSubtotal + shipping
 
       console.log('Creating Yoco checkout for amount:', total, 'with discount:', discount)

@@ -2,9 +2,10 @@
 
 import { useCart } from "../lib/cart-context"
 import { useVisitorTracking } from "../../hooks/useVisitorTracking"
-import { DiscountProvider } from "../lib/discount-context"
+import { DiscountProvider, useDiscount } from "../lib/discount-context"
 import CheckoutForm from "../components/CheckoutForm"
 import CheckoutSummary from "../components/CheckoutSummary"
+import BundleBanner from "../components/BundleBanner"
 import Link from "next/link"
 import { ArrowLeft, ShoppingBag, AlertCircle } from "lucide-react"
 import Footer from "../components/Footer"
@@ -14,13 +15,59 @@ import { useSearchParams } from "next/navigation"
 function CheckoutContent() {
   const { state, dispatch } = useCart()
   const { trackActivity } = useVisitorTracking()
+  const { applyDiscount } = useDiscount()
   const searchParams = useSearchParams()
   const [paymentError, setPaymentError] = useState<string | null>(null)
   const [cartRestored, setCartRestored] = useState(false)
+  const [bundleApplied, setBundleApplied] = useState(false)
 
-  // Restore cart from localStorage if empty
+  // Handle bundle parameter and restore cart
   useEffect(() => {
-    if (state.items.length === 0 && !cartRestored) {
+    const bundle = searchParams.get('bundle')
+    
+    if (bundle === 'glow-duo' && state.items.length === 0) {
+      // Add bundle items to cart
+      const bundleItems = [
+        {
+          id: "lumeye-serum",
+          name: "Lumeye Under Eye Serum",
+          price: 299,
+          image: "/lumeye shot 5.png",
+          quantity: 1
+        },
+        {
+          id: "lumeye-glowsmile",
+          name: "Lumeye GlowSmile - Instant Violet Whitening Drops",
+          price: 199,
+          image: "/lumeye teeth 1.png",
+          quantity: 1
+        }
+      ]
+      
+      // Clear cart and add bundle items
+      dispatch({ type: "CLEAR_CART" })
+      bundleItems.forEach(item => {
+        dispatch({
+          type: "ADD_ITEM",
+          payload: {
+            id: item.id,
+            name: item.name,
+            price: item.price,
+            image: item.image,
+          }
+        })
+      })
+      
+      setCartRestored(true)
+      setBundleApplied(true)
+      
+      // Apply bundle discount
+      const bundleSubtotal = bundleItems.reduce((sum, item) => sum + item.price, 0)
+      applyDiscount('GLOWDUO', bundleSubtotal)
+      
+      console.log('Bundle items added to cart:', bundleItems)
+    } else if (state.items.length === 0 && !cartRestored) {
+      // Restore cart from localStorage if empty
       const savedCart = localStorage.getItem("lumeye-cart")
       if (savedCart) {
         try {
@@ -35,7 +82,7 @@ function CheckoutContent() {
         }
       }
     }
-  }, [state.items.length, cartRestored, dispatch])
+  }, [state.items.length, cartRestored, dispatch, searchParams])
 
   // Check for payment status parameters
   useEffect(() => {
@@ -166,6 +213,7 @@ function CheckoutContent() {
         )}
 
         <DiscountProvider>
+          {bundleApplied && <BundleBanner />}
           <div className="grid lg:grid-cols-2 gap-12">
             <CheckoutForm />
             <CheckoutSummary />

@@ -25,8 +25,8 @@ export default function ShippingPage() {
                     <Clock className="w-4 h-4 text-pink-600 mr-2" />
                     3-5 business days
                   </p>
-                  <p className="font-semibold text-pink-600">FREE on orders over R250</p>
-                  <p>R50 for orders under R250</p>
+                  <p className="font-semibold text-green-600">FREE on all orders!</p>
+                  <p>No minimum order value required</p>
                 </div>
               </div>
               <div className="bg-cool-grey p-6 rounded-2xl">
@@ -36,8 +36,8 @@ export default function ShippingPage() {
                     <Clock className="w-4 h-4 text-pink-600 mr-2" />
                     1-2 business days
                   </p>
-                  <p className="font-semibold">R150 nationwide</p>
-                  <p>Available in major cities</p>
+                  <p className="font-semibold text-green-600">FREE on all orders!</p>
+                  <p>Available nationwide</p>
                 </div>
               </div>
             </div>
