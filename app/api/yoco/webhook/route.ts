@@ -169,7 +169,8 @@ export async function POST(request: NextRequest) {
             items: lineItems.map((item: any) => ({
               name: item.displayName || 'Lumeye Under Eye Serum',
               quantity: item.quantity,
-              price: item.pricingDetails.price / 100
+              price: item.pricingDetails.price / 100,
+              productType: item.displayName?.toLowerCase().includes('glowsmile') ? 'glowsmile' : 'eye_serum'
             })),
             shippingAddress: {
               firstName: metadata.firstName || '',

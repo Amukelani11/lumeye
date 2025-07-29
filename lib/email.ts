@@ -20,6 +20,7 @@ export interface OrderConfirmationData {
     name: string
     quantity: number
     price: number
+    productType?: 'eye_serum' | 'glowsmile' | 'bundle'
   }>
   shippingAddress: {
     firstName: string
@@ -185,6 +186,20 @@ export class EmailService {
   }
 
   static async sendOrderConfirmation(data: OrderConfirmationData) {
+    // Determine product type for personalized messaging
+    const hasEyeSerum = data.items.some(item => item.productType === 'eye_serum' || item.name.toLowerCase().includes('eye serum'))
+    const hasGlowSmile = data.items.some(item => item.productType === 'glowsmile' || item.name.toLowerCase().includes('glowsmile'))
+    const isBundle = hasEyeSerum && hasGlowSmile
+    
+    let productMessage = "We're excited to ship your Lumeye products!"
+    if (isBundle) {
+      productMessage = "We're excited to ship your Lumeye Glow Duo - Eye Serum & GlowSmile!"
+    } else if (hasEyeSerum) {
+      productMessage = "We're excited to ship your Lumeye Under Eye Serum!"
+    } else if (hasGlowSmile) {
+      productMessage = "We're excited to ship your Lumeye GlowSmile!"
+    }
+
     const html = `
       <!DOCTYPE html>
       <html>
@@ -217,6 +232,7 @@ export class EmailService {
               <h3>📦 Your Tracking Information</h3>
               <p><strong>Tracking Number:</strong> ${data.trackingNumber}</p>
               <p><strong>Order Number:</strong> ${data.orderNumber}</p>
+              <p>${productMessage}</p>
               <p>You can track your order using the tracking number above. We'll send you updates as your order progresses!</p>
             </div>
 
