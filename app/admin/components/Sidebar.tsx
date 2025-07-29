@@ -7,6 +7,7 @@ export default function Sidebar() {
       <nav className="flex-1 p-4 space-y-2">
         <a href="/admin" className="block px-4 py-2 rounded-lg font-medium text-pink-600 bg-pink-50">Dashboard</a>
         <a href="/admin/orders" className="block px-4 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100">Orders</a>
+        <a href="/admin/announcements" className="block px-4 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100">Live Announcements</a>
         <a href="/admin/abandoned-carts" className="block px-4 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100">Abandoned Carts</a>
         <a href="/admin/checkout-abandonments" className="block px-4 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100">Checkout Abandonments</a>
         <a href="/admin/email-captures" className="block px-4 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100">Email Captures</a>
