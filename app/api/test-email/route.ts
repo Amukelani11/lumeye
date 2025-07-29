@@ -3,13 +3,13 @@ import { EmailService } from "@/lib/email"
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, type } = await request.json()
+    const { email, type, quantity = 1 } = await request.json()
 
     if (!email) {
       return NextResponse.json({ error: 'Email is required' }, { status: 400 })
     }
 
-    console.log('Testing email sending to:', email, 'Type:', type)
+    console.log('Testing email sending to:', email, 'Type:', type, 'Quantity:', quantity)
 
     let result
 
@@ -19,10 +19,10 @@ export async function POST(request: NextRequest) {
           customerEmail: email,
           cartItems: [{
             name: 'Lumeye Under Eye Serum',
-            quantity: 1,
+            quantity: quantity,
             price: 299.00
           }],
-          totalValue: 299.00,
+          totalValue: 299.00 * quantity,
           recoveryUrl: `${process.env.NEXT_PUBLIC_YOCO_BASE_URL || 'http://localhost:3000'}/cart?session=test-session`
         })
         break
@@ -32,10 +32,10 @@ export async function POST(request: NextRequest) {
           customerEmail: email,
           checkoutItems: [{
             name: 'Lumeye Under Eye Serum',
-            quantity: 1,
+            quantity: quantity,
             price: 299.00
           }],
-          totalValue: 299.00,
+          totalValue: 299.00 * quantity,
           recoveryUrl: `${process.env.NEXT_PUBLIC_YOCO_BASE_URL || 'http://localhost:3000'}/checkout?session=test-session`
         })
         break
@@ -43,10 +43,10 @@ export async function POST(request: NextRequest) {
       case 'failed_payment':
         result = await EmailService.sendFailedPaymentEmail({
           customerEmail: email,
-          totalAmount: 299.00,
+          totalAmount: 299.00 * quantity,
           items: [{
             name: 'Lumeye Under Eye Serum',
-            quantity: 1,
+            quantity: quantity,
             price: 299.00
           }],
           paymentMethod: 'Credit Card',

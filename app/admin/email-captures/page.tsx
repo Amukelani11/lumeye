@@ -29,8 +29,12 @@ interface EmailStats {
 export default function EmailCapturesPage() {
   const [emailCaptures, setEmailCaptures] = useState<EmailCapture[]>([])
   const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [filter, setFilter] = useState("all")
+  const [searchTerm, setSearchTerm] = useState('')
+  const [filterSource, setFilterSource] = useState('all')
+  const [manualEmail, setManualEmail] = useState('')
+  const [manualEmailType, setManualEmailType] = useState('abandoned_cart')
+  const [manualQuantity, setManualQuantity] = useState(1)
+  const [sendingManualEmail, setSendingManualEmail] = useState(false)
   const [stats, setStats] = useState<EmailStats>({
     total: 0,
     fromDiscount: 0,
@@ -41,7 +45,7 @@ export default function EmailCapturesPage() {
     thisWeek: 0,
     thisMonth: 0
   })
-  const [sendingEmail, setSendingEmail] = useState<string | null>(null)
+  const [sendingEmail, setSendingEmail] = useState<string>('')
 
   useEffect(() => {
     fetchEmailCaptures()
@@ -163,7 +167,7 @@ export default function EmailCapturesPage() {
       console.error('Error sending test email:', error)
       alert('Error sending test email. Please try again.')
     } finally {
-      setSendingEmail(null)
+      setSendingEmail('')
     }
   }
 
@@ -206,10 +210,46 @@ export default function EmailCapturesPage() {
     window.URL.revokeObjectURL(url)
   }
 
-  const filteredEmails = emailCaptures.filter(email => {
+  const sendManualEmail = async () => {
+    if (!manualEmail.trim()) {
+      alert('Please enter an email address')
+      return
+    }
+
+    setSendingManualEmail(true)
+    try {
+      const response = await fetch('/api/test-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: manualEmail.trim(),
+          type: manualEmailType,
+          quantity: manualQuantity
+        }),
+      })
+
+      if (response.ok) {
+        alert(`${manualEmailType.replace('_', ' ')} email sent successfully to ${manualEmail}!`)
+        setManualEmail('')
+        setManualQuantity(1)
+      } else {
+        const errorData = await response.json()
+        alert(`Error sending email: ${errorData.error || 'Unknown error'}`)
+      }
+    } catch (error) {
+      console.error('Error sending manual email:', error)
+      alert('Error sending email. Please check the console for details.')
+    } finally {
+      setSendingManualEmail(false)
+    }
+  }
+
+  const filteredEmails = emailCaptures.filter((email) => {
     const matchesSearch = email.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          email.session_id?.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesFilter = filter === 'all' || email.source === filter
+    const matchesFilter = filterSource === 'all' || email.source === filterSource
     return matchesSearch && matchesFilter
   })
 
@@ -343,6 +383,68 @@ export default function EmailCapturesPage() {
           </div>
         </div>
 
+        {/* Manual Email Sending Section */}
+        <div className="bg-white rounded-lg shadow p-6 mb-6">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Send Manual Email</h2>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Email Address
+              </label>
+              <input
+                type="email"
+                value={manualEmail}
+                onChange={(e) => setManualEmail(e.target.value)}
+                placeholder="Enter email address"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-600 focus:border-transparent"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Email Type
+              </label>
+              <select
+                value={manualEmailType}
+                onChange={(e) => setManualEmailType(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-600 focus:border-transparent"
+              >
+                <option value="abandoned_cart">Abandoned Cart</option>
+                <option value="checkout_abandonment">Checkout Abandonment</option>
+                <option value="failed_payment">Failed Payment</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Quantity
+              </label>
+              <input
+                type="number"
+                min="1"
+                max="10"
+                value={manualQuantity}
+                onChange={(e) => setManualQuantity(parseInt(e.target.value) || 1)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-600 focus:border-transparent"
+              />
+            </div>
+            <div className="flex items-end">
+              <button
+                onClick={sendManualEmail}
+                disabled={sendingManualEmail || !manualEmail.trim()}
+                className="w-full bg-pink-600 text-white px-4 py-2 rounded-lg hover:bg-pink-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              >
+                {sendingManualEmail ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Sending...
+                  </>
+                ) : (
+                  'Send Email'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+
         {/* Filters and Actions */}
         <div className="bg-white rounded-lg shadow p-6 mb-6">
           <div className="flex flex-col sm:flex-row gap-4">
@@ -360,8 +462,8 @@ export default function EmailCapturesPage() {
             </div>
             <div className="sm:w-48">
               <select
-                value={filter}
-                onChange={(e) => setFilter(e.target.value)}
+                value={filterSource}
+                onChange={(e) => setFilterSource(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-600 focus:border-transparent"
               >
                 <option value="all">All Sources</option>
@@ -544,7 +646,7 @@ export default function EmailCapturesPage() {
             <Mail className="mx-auto h-12 w-12 text-gray-400" />
             <h3 className="mt-2 text-sm font-medium text-gray-900">No email captures</h3>
             <p className="mt-1 text-sm text-gray-500">
-              {searchTerm || filter !== 'all' ? 'Try adjusting your search or filters.' : 'No emails have been captured yet.'}
+              {searchTerm || filterSource !== 'all' ? 'Try adjusting your search or filters.' : 'No emails have been captured yet.'}
             </p>
           </div>
         )}
