@@ -21,7 +21,32 @@ export async function POST(request: NextRequest) {
         })
       }
 
-      // Check if this email has already used this discount
+      // For WELCOME10, allow any email to use it (one-time use per email)
+      if (discountCode.toUpperCase() === 'WELCOME10') {
+        // Check if this email has already used this discount
+        const { data: emailCapture, error } = await supabase
+          .from('email_captures')
+          .select('*')
+          .eq('email', email.toLowerCase())
+          .eq('discount_code', discountCode.toUpperCase())
+          .single()
+
+        if (error && error.code !== 'PGRST116') {
+          console.error('Error checking discount:', error)
+          return NextResponse.json({ error: 'Failed to check discount' }, { status: 500 })
+        }
+
+        // If email doesn't exist in captures, they can use the discount
+        // If email exists but discount not applied, they can use it
+        const hasDiscount = !emailCapture || !emailCapture.discount_applied
+
+        return NextResponse.json({
+          hasDiscount,
+          discountCode: hasDiscount ? discountCode.toUpperCase() : null
+        })
+      }
+
+      // For other discount codes, check if this email has already used this discount
       const { data: emailCapture, error } = await supabase
         .from('email_captures')
         .select('*')

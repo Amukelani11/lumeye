@@ -23,45 +23,102 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Check if this email has this discount available
-    const { data: emailCapture, error: checkError } = await supabase
-      .from('email_captures')
-      .select('*')
-      .eq('email', email.toLowerCase())
-      .eq('discount_code', discountCode.toUpperCase())
-      .single()
+    // For WELCOME10, allow any email to use it (one-time use per email)
+    if (discountCode.toUpperCase() === 'WELCOME10') {
+      // Check if this email has already used this discount
+      const { data: emailCapture, error: checkError } = await supabase
+        .from('email_captures')
+        .select('*')
+        .eq('email', email.toLowerCase())
+        .eq('discount_code', discountCode.toUpperCase())
+        .single()
 
-    if (checkError && checkError.code !== 'PGRST116') {
-      console.error('Error checking discount:', checkError)
-      return NextResponse.json({ error: 'Failed to check discount' }, { status: 500 })
-    }
+      if (checkError && checkError.code !== 'PGRST116') {
+        console.error('Error checking discount:', checkError)
+        return NextResponse.json({ error: 'Failed to check discount' }, { status: 500 })
+      }
 
-    if (!emailCapture) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Discount code not available for this email' 
-      })
-    }
+      if (emailCapture && emailCapture.discount_applied) {
+        return NextResponse.json({ 
+          success: false, 
+          error: 'Discount code has already been used' 
+        })
+      }
 
-    if (emailCapture.discount_applied) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Discount code has already been used' 
-      })
-    }
+      // If email doesn't exist in captures, create a new record
+      if (!emailCapture) {
+        const { data: newCapture, error: createError } = await supabase
+          .from('email_captures')
+          .insert({
+            email: email.toLowerCase(),
+            discount_code: discountCode.toUpperCase(),
+            discount_applied: true,
+            applied_at: new Date().toISOString(),
+            source: 'manual_entry'
+          })
+          .select()
+          .single()
 
-    // Mark discount as applied
-    const { error: updateError } = await supabase
-      .from('email_captures')
-      .update({ 
-        discount_applied: true,
-        applied_at: new Date().toISOString()
-      })
-      .eq('id', emailCapture.id)
+        if (createError) {
+          console.error('Error creating email capture:', createError)
+          return NextResponse.json({ error: 'Failed to apply discount' }, { status: 500 })
+        }
+      } else {
+        // Mark existing discount as applied
+        const { error: updateError } = await supabase
+          .from('email_captures')
+          .update({ 
+            discount_applied: true,
+            applied_at: new Date().toISOString()
+          })
+          .eq('id', emailCapture.id)
 
-    if (updateError) {
-      console.error('Error applying discount:', updateError)
-      return NextResponse.json({ error: 'Failed to apply discount' }, { status: 500 })
+        if (updateError) {
+          console.error('Error applying discount:', updateError)
+          return NextResponse.json({ error: 'Failed to apply discount' }, { status: 500 })
+        }
+      }
+    } else {
+      // For other discount codes, check if this email has this discount available
+      const { data: emailCapture, error: checkError } = await supabase
+        .from('email_captures')
+        .select('*')
+        .eq('email', email.toLowerCase())
+        .eq('discount_code', discountCode.toUpperCase())
+        .single()
+
+      if (checkError && checkError.code !== 'PGRST116') {
+        console.error('Error checking discount:', checkError)
+        return NextResponse.json({ error: 'Failed to check discount' }, { status: 500 })
+      }
+
+      if (!emailCapture) {
+        return NextResponse.json({ 
+          success: false, 
+          error: 'Discount code not available for this email' 
+        })
+      }
+
+      if (emailCapture.discount_applied) {
+        return NextResponse.json({ 
+          success: false, 
+          error: 'Discount code has already been used' 
+        })
+      }
+
+      // Mark discount as applied
+      const { error: updateError } = await supabase
+        .from('email_captures')
+        .update({ 
+          discount_applied: true,
+          applied_at: new Date().toISOString()
+        })
+        .eq('id', emailCapture.id)
+
+      if (updateError) {
+        console.error('Error applying discount:', updateError)
+        return NextResponse.json({ error: 'Failed to apply discount' }, { status: 500 })
+      }
     }
 
     // Calculate discount amount (10% for WELCOME10)
