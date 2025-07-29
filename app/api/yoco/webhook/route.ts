@@ -102,7 +102,70 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Failed to update order' }, { status: 500 })
       }
 
+      // Update payment record
+      const { error: paymentUpdateError } = await supabase
+        .from('payments')
+        .update({
+          status: 'failed',
+          updated_at: new Date().toISOString()
+        })
+        .eq('order_id', order.id)
+
+      if (paymentUpdateError) {
+        console.error('Error updating payment record:', paymentUpdateError)
+        // Don't fail the webhook if payment record update fails
+      }
+
       console.log('Order marked as failed:', order.id)
+    }
+
+    // Handle checkout.cancelled event
+    if (event.type === 'checkout.cancelled') {
+      const checkout = event.data
+      console.log('Checkout cancelled:', checkout)
+
+      // Find order by checkout ID
+      const { data: order, error: orderError } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('payment_id', checkout.id)
+        .single()
+
+      if (orderError || !order) {
+        console.error('Order not found for checkout ID:', checkout.id)
+        return NextResponse.json({ error: 'Order not found' }, { status: 404 })
+      }
+
+      // Update order status
+      const { error: updateError } = await supabase
+        .from('orders')
+        .update({
+          status: 'cancelled',
+          payment_status: 'failed',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', order.id)
+
+      if (updateError) {
+        console.error('Error updating order:', updateError)
+        return NextResponse.json({ error: 'Failed to update order' }, { status: 500 })
+      }
+
+      // Update payment record
+      const { error: paymentUpdateError } = await supabase
+        .from('payments')
+        .update({
+          status: 'failed',
+          updated_at: new Date().toISOString()
+        })
+        .eq('order_id', order.id)
+
+      if (paymentUpdateError) {
+        console.error('Error updating payment record:', paymentUpdateError)
+        // Don't fail the webhook if payment record update fails
+      }
+
+      console.log('Order marked as cancelled:', order.id)
     }
 
     return NextResponse.json({ received: true })

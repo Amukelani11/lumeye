@@ -67,8 +67,8 @@ export async function POST(request: NextRequest) {
         order_number: orderNumber,
         email,
         phone,
-        status: 'confirmed',
-        payment_status: 'completed',
+        status: 'pending',
+        payment_status: 'pending',
         shipping_status: 'pending',
         subtotal,
         shipping_cost: shippingCost,
@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
         total_amount: totalAmount,
         currency: 'ZAR',
         tracking_number: trackingNumber,
-        notes: notes || `Payment processed via ${paymentMethod}. Payment ID: ${paymentId}`
+        notes: notes || `Payment pending via ${paymentMethod}. Payment ID: ${paymentId}`
       })
       .select()
       .single()
@@ -138,8 +138,8 @@ export async function POST(request: NextRequest) {
         payment_id: paymentId,
         amount: paymentAmount,
         currency: 'ZAR',
-        status: 'completed',
-        transaction_id: paymentId
+        status: 'pending',
+        transaction_id: null
       })
 
     if (paymentError) {

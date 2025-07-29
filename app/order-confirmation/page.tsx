@@ -10,38 +10,86 @@ import { trackPurchase as gaTrackPurchase } from "../../lib/google-analytics"
 function OrderConfirmationContent() {
   const searchParams = useSearchParams()
   const orderId = searchParams.get('orderId')
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [orderStatus, setOrderStatus] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    // Set loading to false immediately since we don't need to fetch order details
-    setLoading(false)
-    
-    // Track purchase event for Meta Pixel
     if (orderId) {
-      trackPurchase(299, 'ZAR', orderId)
+      // Check order status from database
+      fetch(`/api/check-payment-status?checkout_id=${orderId}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.success && data.order) {
+            const order = data.order
+            setOrderStatus(order.paymentStatus)
+            
+            if (order.paymentStatus === 'completed' && order.status === 'confirmed') {
+              // Track purchase event for Meta Pixel
+              trackPurchase(299, 'ZAR', order.orderNumber)
+              
+              // Track purchase event for Google Analytics
+              gaTrackPurchase({
+                transaction_id: order.orderNumber,
+                value: 299,
+                currency: 'ZAR',
+                items: [{
+                  item_id: 'lumeye-serum',
+                  item_name: 'Lumeye Under Eye Serum',
+                  price: 299,
+                  quantity: 1
+                }]
+              })
+            } else if (order.paymentStatus === 'failed' || order.status === 'cancelled') {
+              setError('Payment was not completed. Please try again.')
+            }
+          } else {
+            setError('Order not found')
+          }
+        })
+        .catch(error => {
+          console.error('Error checking order status:', error)
+          setError('Unable to verify order status')
+        })
+        .finally(() => {
+          setLoading(false)
+        })
     } else {
-      // Fallback if no order ID
-      trackPurchase(299, 'ZAR')
+      setLoading(false)
+      setError('No order ID provided')
     }
-    
-    // Track purchase event for Google Analytics
-    gaTrackPurchase({
-      transaction_id: orderId || `order_${Date.now()}`,
-      value: 299,
-      currency: 'ZAR',
-      items: [{
-        item_id: 'lumeye-serum',
-        item_name: 'Lumeye Under Eye Serum',
-        price: 299,
-        quantity: 1
-      }]
-    })
   }, [orderId])
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600"></div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-12">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-6">
+              <CheckCircle className="h-8 w-8 text-red-600" />
+            </div>
+            <h1 className="font-dm-sans text-3xl font-bold text-gray-900 mb-4">
+              Payment Issue
+            </h1>
+            <p className="text-lg text-gray-600 mb-8">
+              {error}
+            </p>
+            <Link 
+              href="/checkout" 
+              className="inline-block px-6 py-3 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-colors"
+            >
+              Try Again
+            </Link>
+          </div>
+        </div>
       </div>
     )
   }

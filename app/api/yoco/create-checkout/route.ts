@@ -26,15 +26,18 @@ export async function POST(request: NextRequest) {
       }, { status: 500 })
     }
 
+    const checkoutId = `checkout_${Date.now()}`
+    const baseUrl = process.env.NEXT_PUBLIC_YOCO_BASE_URL || 'http://localhost:3000'
+    
     const checkoutData = {
       amount: Math.round(amount * 100), // Convert to cents
       currency,
-      cancelUrl: cancelUrl || `${process.env.NEXT_PUBLIC_YOCO_BASE_URL || 'http://localhost:3000'}/checkout`,
-      successUrl: successUrl || `${process.env.NEXT_PUBLIC_YOCO_BASE_URL || 'http://localhost:3000'}/order-confirmation`,
-      failureUrl: failureUrl || `${process.env.NEXT_PUBLIC_YOCO_BASE_URL || 'http://localhost:3000'}/checkout`,
+      cancelUrl: cancelUrl || `${baseUrl}/checkout?payment_status=cancelled&checkout_id=${checkoutId}`,
+      successUrl: successUrl || `${baseUrl}/order-confirmation`,
+      failureUrl: failureUrl || `${baseUrl}/checkout?payment_status=failed&checkout_id=${checkoutId}&error_message=Payment was not completed`,
       metadata: {
         ...metadata,
-        checkoutId: `checkout_${Date.now()}`,
+        checkoutId: checkoutId,
         paymentFacilitator: 'yoco-online-checkout'
       },
       lineItems: lineItems ? lineItems.map((item: any) => ({

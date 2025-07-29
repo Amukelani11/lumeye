@@ -14,6 +14,7 @@ interface FormData {
   city: string
   postalCode: string
   phone: string
+  discountCode: string
 }
 
 interface FormErrors {
@@ -24,6 +25,7 @@ export default function CheckoutForm() {
   const { state, dispatch } = useCart()
   const { applyDiscount } = useDiscount()
   const [isProcessing, setIsProcessing] = useState(false)
+  const [discountLoading, setDiscountLoading] = useState(false)
   const [formData, setFormData] = useState<FormData>({
     email: "",
     firstName: "",
@@ -32,6 +34,7 @@ export default function CheckoutForm() {
     city: "",
     postalCode: "",
     phone: "",
+    discountCode: "",
   })
   const [errors, setErrors] = useState<FormErrors>({})
 
@@ -81,6 +84,63 @@ export default function CheckoutForm() {
       }).catch(error => {
         console.error('Error checking discount:', error)
       })
+    }
+  }
+
+  const handleApplyDiscount = async () => {
+    if (!formData.discountCode.trim()) {
+      setErrors(prev => ({ ...prev, discountCode: 'Please enter a discount code' }))
+      return
+    }
+
+    setDiscountLoading(true)
+    setErrors(prev => ({ ...prev, discountCode: '' }))
+
+    try {
+      const cartValue = state.items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+      
+      const response = await fetch('/api/check-discount', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          discountCode: formData.discountCode.trim().toUpperCase()
+        }),
+      })
+
+      const data = await response.json()
+
+      if (data.hasDiscount) {
+        // Apply the discount in the database
+        const applyResponse = await fetch('/api/apply-discount', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: formData.email,
+            discountCode: formData.discountCode.trim().toUpperCase()
+          }),
+        })
+
+        const applyData = await applyResponse.json()
+
+        if (applyData.success) {
+          applyDiscount(formData.discountCode.trim().toUpperCase(), cartValue)
+          setErrors(prev => ({ ...prev, discountCode: '' }))
+        } else {
+          setErrors(prev => ({ ...prev, discountCode: applyData.error || 'Failed to apply discount' }))
+        }
+      } else {
+        setErrors(prev => ({ ...prev, discountCode: 'Invalid or expired discount code' }))
+      }
+    } catch (error) {
+      console.error('Error applying discount:', error)
+      setErrors(prev => ({ ...prev, discountCode: 'Error applying discount code' }))
+    } finally {
+      setDiscountLoading(false)
     }
   }
 
@@ -292,6 +352,40 @@ export default function CheckoutForm() {
               placeholder="your@email.com"
             />
             {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
+          </div>
+        </div>
+
+        {/* Discount Code */}
+        <div>
+          <h2 className="font-dm-sans text-xl font-semibold text-gray-900 mb-6">Discount Code</h2>
+          <div className="flex gap-3">
+            <div className="flex-1">
+              <label htmlFor="discountCode" className="block text-sm font-medium text-gray-700 mb-2">
+                Have a discount code?
+              </label>
+              <input
+                type="text"
+                id="discountCode"
+                name="discountCode"
+                value={formData.discountCode}
+                onChange={handleInputChange}
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-pink-600 focus:border-transparent ${
+                  errors.discountCode ? "border-red-500" : "border-gray-300"
+                }`}
+                placeholder="Enter discount code"
+              />
+              {errors.discountCode && <p className="mt-1 text-sm text-red-600">{errors.discountCode}</p>}
+            </div>
+            <div className="flex items-end">
+              <button
+                type="button"
+                onClick={handleApplyDiscount}
+                disabled={discountLoading || !formData.discountCode.trim()}
+                className="px-6 py-3 bg-pink-600 text-white rounded-lg hover:bg-pink-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+              >
+                {discountLoading ? "Applying..." : "Apply"}
+              </button>
+            </div>
           </div>
         </div>
 

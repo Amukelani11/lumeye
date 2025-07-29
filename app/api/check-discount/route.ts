@@ -3,13 +3,46 @@ import { supabase } from '@/lib/database'
 
 export async function POST(request: NextRequest) {
   try {
-    const { email } = await request.json()
+    const { email, discountCode } = await request.json()
     
     if (!email || !email.includes('@')) {
       return NextResponse.json({ error: 'Valid email is required' }, { status: 400 })
     }
 
-    // Check if email exists in email_captures table
+    // If a specific discount code is provided, validate it
+    if (discountCode) {
+      // For now, we'll support WELCOME10 as a valid discount code
+      const validDiscountCodes = ['WELCOME10']
+      
+      if (!validDiscountCodes.includes(discountCode.toUpperCase())) {
+        return NextResponse.json({ 
+          hasDiscount: false, 
+          error: 'Invalid discount code' 
+        })
+      }
+
+      // Check if this email has already used this discount
+      const { data: emailCapture, error } = await supabase
+        .from('email_captures')
+        .select('*')
+        .eq('email', email.toLowerCase())
+        .eq('discount_code', discountCode.toUpperCase())
+        .single()
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error checking discount:', error)
+        return NextResponse.json({ error: 'Failed to check discount' }, { status: 500 })
+      }
+
+      const hasDiscount = !!emailCapture && !emailCapture.discount_applied
+
+      return NextResponse.json({
+        hasDiscount,
+        discountCode: hasDiscount ? discountCode.toUpperCase() : null
+      })
+    }
+
+    // If no specific discount code, check if email has any available discount
     const { data: emailCapture, error } = await supabase
       .from('email_captures')
       .select('*')

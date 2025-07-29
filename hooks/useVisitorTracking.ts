@@ -7,6 +7,7 @@ interface TrackingData {
   email?: string
   cartValue?: number
   items?: any[]
+  checkoutId?: string
 }
 
 export const useVisitorTracking = () => {

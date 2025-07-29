@@ -6,13 +6,54 @@ import { DiscountProvider } from "../lib/discount-context"
 import CheckoutForm from "../components/CheckoutForm"
 import CheckoutSummary from "../components/CheckoutSummary"
 import Link from "next/link"
-import { ArrowLeft, ShoppingBag } from "lucide-react"
+import { ArrowLeft, ShoppingBag, AlertCircle } from "lucide-react"
 import Footer from "../components/Footer"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
+import { useSearchParams } from "next/navigation"
 
 export default function CheckoutPage() {
   const { state } = useCart()
   const { trackActivity } = useVisitorTracking()
+  const searchParams = useSearchParams()
+  const [paymentError, setPaymentError] = useState<string | null>(null)
+
+  // Check for payment status parameters
+  useEffect(() => {
+    const paymentStatus = searchParams.get('payment_status')
+    const errorMessage = searchParams.get('error_message')
+    const checkoutId = searchParams.get('checkout_id')
+
+    if (paymentStatus === 'failed' || paymentStatus === 'cancelled') {
+      setPaymentError(errorMessage || 'Payment was not completed. Please try again.')
+      
+      // Track payment failure
+      trackActivity({
+        action: 'payment_failed',
+        page: '/checkout',
+        checkoutId: checkoutId || 'unknown'
+      })
+    }
+
+    // If there's a checkout ID, verify payment status from database
+    if (checkoutId) {
+      fetch(`/api/check-payment-status?checkout_id=${checkoutId}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.success && data.order) {
+            const order = data.order
+            if (order.paymentStatus === 'failed' || order.status === 'cancelled') {
+              setPaymentError('Payment was not completed. Please try again.')
+            } else if (order.paymentStatus === 'completed' && order.status === 'confirmed') {
+              // Payment was successful, redirect to order confirmation
+              window.location.href = `/order-confirmation?orderId=${order.orderNumber}`
+            }
+          }
+        })
+        .catch(error => {
+          console.error('Error checking payment status:', error)
+        })
+    }
+  }, [searchParams, trackActivity])
 
   // Track checkout page view
   useEffect(() => {
@@ -54,6 +95,19 @@ export default function CheckoutPage() {
           <h1 className="font-dm-sans text-3xl font-bold text-gray-900">Checkout</h1>
           <p className="text-gray-600 mt-2">Complete your order</p>
         </div>
+
+        {/* Payment Error Alert */}
+        {paymentError && (
+          <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+            <div className="flex items-center">
+              <AlertCircle className="w-5 h-5 text-red-600 mr-3" />
+              <div>
+                <h3 className="text-sm font-medium text-red-800">Payment Failed</h3>
+                <p className="text-sm text-red-700 mt-1">{paymentError}</p>
+              </div>
+            </div>
+          </div>
+        )}
 
         <DiscountProvider>
           <div className="grid lg:grid-cols-2 gap-12">
