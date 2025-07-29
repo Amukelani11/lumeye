@@ -23,7 +23,7 @@ interface FormErrors {
 
 export default function CheckoutForm() {
   const { state, dispatch } = useCart()
-  const { applyDiscount } = useDiscount()
+  const { applyDiscount, discountApplied, discountAmount } = useDiscount()
   const [isProcessing, setIsProcessing] = useState(false)
   const [discountLoading, setDiscountLoading] = useState(false)
   const [formData, setFormData] = useState<FormData>({
@@ -243,12 +243,14 @@ export default function CheckoutForm() {
     setIsProcessing(true)
 
     try {
-      // Calculate total amount
+      // Calculate total amount with discount
       const subtotal = state.total
-      const shipping = subtotal >= 250 ? 0 : 50
-      const total = subtotal + shipping
+      const discount = discountApplied ? discountAmount : 0
+      const discountedSubtotal = subtotal - discount
+      const shipping = discountedSubtotal >= 250 ? 0 : 50
+      const total = discountedSubtotal + shipping
 
-      console.log('Creating Yoco checkout for amount:', total)
+      console.log('Creating Yoco checkout for amount:', total, 'with discount:', discount)
 
       // Create line items for display
       const lineItems = state.items.map(item => ({
@@ -327,6 +329,8 @@ export default function CheckoutForm() {
     isProcessing,
     cartItems: state.items.length,
     total: state.total,
+    discountApplied,
+    discountAmount,
     isButtonDisabled
   })
 
