@@ -8,10 +8,10 @@ import CheckoutSummary from "../components/CheckoutSummary"
 import Link from "next/link"
 import { ArrowLeft, ShoppingBag, AlertCircle } from "lucide-react"
 import Footer from "../components/Footer"
-import { useEffect, useState } from "react"
+import { useEffect, useState, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 
-export default function CheckoutPage() {
+function CheckoutContent() {
   const { state } = useCart()
   const { trackActivity } = useVisitorTracking()
   const searchParams = useSearchParams()
@@ -118,5 +118,17 @@ export default function CheckoutPage() {
       </main>
       <Footer />
     </>
+  )
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600"></div>
+      </div>
+    }>
+      <CheckoutContent />
+    </Suspense>
   )
 }
