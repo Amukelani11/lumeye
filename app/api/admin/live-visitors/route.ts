@@ -3,13 +3,13 @@ import { supabase } from "@/lib/database"
 
 export async function GET() {
   try {
-    // Get visitors active in the last 5 minutes
-    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000)
+    // Get visitors active in the last 2 minutes for more real-time feel
+    const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000)
     
     const { data: visitors, error } = await supabase
       .from('live_visitors')
       .select('*')
-      .gte('last_activity', fiveMinutesAgo.toISOString())
+      .gte('last_activity', twoMinutesAgo.toISOString())
       .order('last_activity', { ascending: false })
 
     if (error) {

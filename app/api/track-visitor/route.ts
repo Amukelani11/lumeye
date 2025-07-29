@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
     const { action, page, email, cartValue, items } = await request.json()
     
     // Get or create visitor session ID
-    const cookieStore = cookies()
+    const cookieStore = await cookies()
     let sessionId = cookieStore.get('visitor_session')?.value
     
     if (!sessionId) {
@@ -41,11 +41,19 @@ export async function POST(request: NextRequest) {
     if (action === 'checkout_start') status = 'checkout'
     if (action === 'purchase') status = 'purchased'
 
+    // Format page name for better display
+    let displayPage = page || 'Unknown'
+    if (displayPage === '/') displayPage = 'Home'
+    if (displayPage === '/product') displayPage = 'Product Page'
+    if (displayPage === '/cart') displayPage = 'Shopping Cart'
+    if (displayPage === '/checkout') displayPage = 'Checkout'
+    if (displayPage === '/order-confirmation') displayPage = 'Order Confirmation'
+
     const { error: liveError } = await supabase
       .from('live_visitors')
       .upsert({
         session_id: sessionId,
-        current_page: page,
+        current_page: displayPage,
         email: email || null,
         cart_value: cartValue || 0,
         items: items || [],

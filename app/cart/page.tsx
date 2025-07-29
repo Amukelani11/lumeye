@@ -5,9 +5,23 @@ import CartItem from "../components/CartItem"
 import Link from "next/link"
 import { ShoppingBag, ArrowLeft } from "lucide-react"
 import Footer from "../components/Footer"
+import { useVisitorTracking } from "../../hooks/useVisitorTracking"
+import { useEffect } from "react"
 
 export default function CartPage() {
   const { state } = useCart()
+  const { trackActivity } = useVisitorTracking()
+
+  // Track cart page view
+  useEffect(() => {
+    const cartValue = state.items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+    trackActivity({
+      action: 'page_view',
+      page: '/cart',
+      cartValue,
+      items: state.items
+    })
+  }, [trackActivity, state.items])
 
   if (state.items.length === 0) {
     return (

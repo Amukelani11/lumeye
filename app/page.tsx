@@ -6,6 +6,7 @@ import BenefitsGrid from "./components/BenefitsGrid"
 import UrgencyCTA from "./components/UrgencyCTA"
 import Testimonials from "./components/Testimonials"
 import Footer from "./components/Footer"
+import HomePageTracker from "./components/HomePageTracker"
 
 export const metadata: Metadata = {
   title: "Lumeye Under Eye Serum | Transform Tired Eyes in 60 Seconds | South Africa",
@@ -39,6 +40,7 @@ export const metadata: Metadata = {
 export default function HomePage() {
   return (
     <>
+      <HomePageTracker />
       <main>
         <HeroSection />
         <BeforeAfterGallery />

@@ -6,6 +6,7 @@ import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { trackPurchase } from "../../lib/meta-pixel"
 import { trackPurchase as gaTrackPurchase } from "../../lib/google-analytics"
+import { useVisitorTracking } from "../../hooks/useVisitorTracking"
 
 function OrderConfirmationContent() {
   const searchParams = useSearchParams()
@@ -13,6 +14,15 @@ function OrderConfirmationContent() {
   const [loading, setLoading] = useState(true)
   const [orderStatus, setOrderStatus] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const { trackActivity } = useVisitorTracking()
+
+  // Track order confirmation page view
+  useEffect(() => {
+    trackActivity({
+      action: 'page_view',
+      page: '/order-confirmation'
+    })
+  }, [trackActivity])
 
   useEffect(() => {
     if (orderId) {

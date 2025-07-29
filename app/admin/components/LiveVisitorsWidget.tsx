@@ -31,8 +31,8 @@ export default function LiveVisitorsWidget() {
     }
 
     fetchLiveVisitors()
-    // Refresh every 10 seconds for real-time updates
-    const interval = setInterval(fetchLiveVisitors, 10000)
+    // Refresh every 5 seconds for real-time updates
+    const interval = setInterval(fetchLiveVisitors, 5000)
     return () => clearInterval(interval)
   }, [])
 
@@ -129,7 +129,7 @@ export default function LiveVisitorsWidget() {
       <div className="mt-4 pt-4 border-t border-gray-200">
         <div className="flex justify-between text-sm text-gray-600">
           <span>Total Active: {liveVisitors.length}</span>
-          <span>Updates every 10s</span>
+          <span>Updates every 5s</span>
         </div>
       </div>
     </div>

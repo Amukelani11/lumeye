@@ -67,6 +67,20 @@ export async function POST(request: NextRequest) {
         // Don't fail the webhook if payment record update fails
       }
 
+      // Update live visitor status to purchased
+      const { error: liveVisitorError } = await supabase
+        .from('live_visitors')
+        .update({
+          status: 'purchased',
+          last_activity: new Date().toISOString()
+        })
+        .eq('session_id', order.payment_id) // Use payment_id as session_id
+
+      if (liveVisitorError) {
+        console.error('Error updating live visitor status:', liveVisitorError)
+        // Don't fail the webhook if live visitor update fails
+      }
+
       console.log('Order updated successfully:', order.id)
     }
 
