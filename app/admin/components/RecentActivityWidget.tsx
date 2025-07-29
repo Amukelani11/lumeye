@@ -13,9 +13,16 @@ export default function RecentActivityWidget() {
         const response = await fetch('/api/admin/visitor-analytics')
         const data = await response.json()
         
-        // Format the activities for display with South African timezone
+        // Format the activities for display with hardcoded South African timezone
         const formattedActivities = data.recentActivity?.map((activity: any) => {
-          const timestamp = formatSATimeOnly(activity.time)
+          const saDate = new Date(activity.time)
+          saDate.setHours(saDate.getHours() + 2) // Add 2 hours for SA time
+          const timestamp = saDate.toLocaleTimeString('en-US', { 
+            hour12: true,
+            hour: 'numeric',
+            minute: '2-digit',
+            second: '2-digit'
+          })
           
           return `${activity.action} on ${activity.page} at ${timestamp}`
         }) || []

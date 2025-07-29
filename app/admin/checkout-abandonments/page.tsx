@@ -266,7 +266,18 @@ export default function CheckoutAbandonmentsPage() {
                         R{abandonment.total_value.toFixed(2)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {formatSATime(abandonment.abandoned_at)}
+                        {(() => {
+                          const saDate = new Date(abandonment.abandoned_at)
+                          saDate.setHours(saDate.getHours() + 2) // Add 2 hours for SA time
+                          return saDate.toLocaleString('en-US', { 
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            second: '2-digit'
+                          })
+                        })()}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${

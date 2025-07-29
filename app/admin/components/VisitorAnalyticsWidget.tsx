@@ -138,7 +138,16 @@ export default function VisitorAnalyticsWidget() {
                   <span className="font-medium">{activity.action}</span>
                   <span className="text-gray-600 ml-2">on {activity.page}</span>
                 </div>
-                <span className="text-gray-500">{formatSATimeOnly(activity.time)}</span>
+                <span className="text-gray-500">{(() => {
+                  const saDate = new Date(activity.time)
+                  saDate.setHours(saDate.getHours() + 2) // Add 2 hours for SA time
+                  return saDate.toLocaleTimeString('en-US', { 
+                    hour12: true,
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    second: '2-digit'
+                  })
+                })()}</span>
               </div>
             ))}
           </div>

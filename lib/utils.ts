@@ -5,9 +5,13 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+// Hardcoded South African timezone (UTC+2)
 export function formatSATime(date: string | Date, options?: Intl.DateTimeFormatOptions) {
+  const saDate = new Date(date)
+  // Add 2 hours for South African time (UTC+2)
+  saDate.setHours(saDate.getHours() + 2)
+  
   const defaultOptions: Intl.DateTimeFormatOptions = {
-    timeZone: 'Africa/Johannesburg',
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
@@ -17,12 +21,15 @@ export function formatSATime(date: string | Date, options?: Intl.DateTimeFormatO
     ...options
   }
   
-  return new Date(date).toLocaleString('en-US', defaultOptions)
+  return saDate.toLocaleString('en-US', defaultOptions)
 }
 
 export function formatSATimeOnly(date: string | Date) {
-  return new Date(date).toLocaleTimeString('en-US', { 
-    timeZone: 'Africa/Johannesburg',
+  const saDate = new Date(date)
+  // Add 2 hours for South African time (UTC+2)
+  saDate.setHours(saDate.getHours() + 2)
+  
+  return saDate.toLocaleTimeString('en-US', { 
     hour12: true,
     hour: 'numeric',
     minute: '2-digit',
@@ -31,8 +38,11 @@ export function formatSATimeOnly(date: string | Date) {
 }
 
 export function formatSADateOnly(date: string | Date) {
-  return new Date(date).toLocaleDateString('en-US', { 
-    timeZone: 'Africa/Johannesburg',
+  const saDate = new Date(date)
+  // Add 2 hours for South African time (UTC+2)
+  saDate.setHours(saDate.getHours() + 2)
+  
+  return saDate.toLocaleDateString('en-US', { 
     year: 'numeric',
     month: '2-digit',
     day: '2-digit'

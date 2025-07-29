@@ -86,17 +86,22 @@ export async function GET() {
       .order('created_at', { ascending: false })
       .limit(10)
 
-    const formattedRecentActivity = recentActivity?.map(activity => ({
-      time: new Date(activity.created_at).toLocaleTimeString('en-US', { 
-        timeZone: 'Africa/Johannesburg',
-        hour12: true,
-        hour: 'numeric',
-        minute: '2-digit',
-        second: '2-digit'
-      }),
-      action: activity.action === 'page_view' ? 'Page viewed' : activity.action,
-      page: activity.page
-    })) || []
+    const formattedRecentActivity = recentActivity?.map(activity => {
+      const saDate = new Date(activity.created_at)
+      // Add 2 hours for South African time (UTC+2)
+      saDate.setHours(saDate.getHours() + 2)
+      
+      return {
+        time: saDate.toLocaleTimeString('en-US', { 
+          hour12: true,
+          hour: 'numeric',
+          minute: '2-digit',
+          second: '2-digit'
+        }),
+        action: activity.action === 'page_view' ? 'Page viewed' : activity.action,
+        page: activity.page
+      }
+    }) || []
 
     return NextResponse.json({
       activeVisitors,

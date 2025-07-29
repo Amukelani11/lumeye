@@ -401,7 +401,18 @@ export default function EmailCapturesPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {formatSATime(emailCapture.created_at)}
+                        {(() => {
+                          const saDate = new Date(emailCapture.created_at)
+                          saDate.setHours(saDate.getHours() + 2) // Add 2 hours for SA time
+                          return saDate.toLocaleString('en-US', { 
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            second: '2-digit'
+                          })
+                        })()}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex space-x-2">

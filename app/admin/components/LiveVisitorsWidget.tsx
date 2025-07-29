@@ -77,8 +77,11 @@ export default function LiveVisitorsWidget() {
   }
 
   const formatTime = (timestamp: string) => {
-    return new Date(timestamp).toLocaleTimeString('en-US', { 
-      timeZone: 'Africa/Johannesburg',
+    const saDate = new Date(timestamp)
+    // Add 2 hours for South African time (UTC+2)
+    saDate.setHours(saDate.getHours() + 2)
+    
+    return saDate.toLocaleTimeString('en-US', { 
       hour12: true,
       hour: 'numeric',
       minute: '2-digit'
