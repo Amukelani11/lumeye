@@ -12,10 +12,30 @@ import { useEffect, useState, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 
 function CheckoutContent() {
-  const { state } = useCart()
+  const { state, dispatch } = useCart()
   const { trackActivity } = useVisitorTracking()
   const searchParams = useSearchParams()
   const [paymentError, setPaymentError] = useState<string | null>(null)
+  const [cartRestored, setCartRestored] = useState(false)
+
+  // Restore cart from localStorage if empty
+  useEffect(() => {
+    if (state.items.length === 0 && !cartRestored) {
+      const savedCart = localStorage.getItem("lumeye-cart")
+      if (savedCart) {
+        try {
+          const cartItems = JSON.parse(savedCart)
+          if (cartItems && cartItems.length > 0) {
+            dispatch({ type: "LOAD_CART", payload: cartItems })
+            setCartRestored(true)
+            console.log('Cart restored from localStorage:', cartItems)
+          }
+        } catch (error) {
+          console.error("Failed to load cart from localStorage:", error)
+        }
+      }
+    }
+  }, [state.items.length, cartRestored, dispatch])
 
   // Check for payment status parameters
   useEffect(() => {
@@ -53,7 +73,7 @@ function CheckoutContent() {
           console.error('Error checking payment status:', error)
         })
     }
-  }, [searchParams, trackActivity])
+  }, [searchParams, trackActivity, state.items.length])
 
   // Track checkout page view
   useEffect(() => {
@@ -67,6 +87,27 @@ function CheckoutContent() {
   }, [trackActivity, state.items])
 
   if (state.items.length === 0) {
+    // Check if this is a cancelled payment return
+    const paymentStatus = searchParams.get('payment_status')
+    
+    if (paymentStatus === 'cancelled' || paymentStatus === 'failed') {
+      return (
+        <>
+          <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 min-h-[60vh]">
+            <div className="text-center py-16">
+              <ShoppingBag className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+              <h1 className="font-dm-sans text-2xl font-bold text-gray-900 mb-4">Payment Cancelled</h1>
+              <p className="text-gray-600 mb-8">Your payment was cancelled. Please return to your cart to try again.</p>
+              <Link href="/cart" className="btn-primary">
+                Return to Cart
+              </Link>
+            </div>
+          </main>
+          <Footer />
+        </>
+      )
+    }
+    
     return (
       <>
         <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 min-h-[60vh]">
@@ -98,12 +139,27 @@ function CheckoutContent() {
 
         {/* Payment Error Alert */}
         {paymentError && (
-          <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
-            <div className="flex items-center">
-              <AlertCircle className="w-5 h-5 text-red-600 mr-3" />
-              <div>
-                <h3 className="text-sm font-medium text-red-800">Payment Failed</h3>
-                <p className="text-sm text-red-700 mt-1">{paymentError}</p>
+          <div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <div className="flex items-start">
+              <AlertCircle className="w-5 h-5 text-yellow-600 mr-3 mt-0.5" />
+              <div className="flex-1">
+                <h3 className="text-sm font-medium text-yellow-800">Payment Cancelled</h3>
+                <p className="text-sm text-yellow-700 mt-1">
+                  {paymentError.includes('cancelled') 
+                    ? 'Your payment was cancelled. You can try again below or return to your cart.'
+                    : paymentError
+                  }
+                </p>
+                {paymentError.includes('cancelled') && (
+                  <div className="mt-3 flex space-x-3">
+                    <Link 
+                      href="/cart" 
+                      className="text-sm text-yellow-800 hover:text-yellow-900 underline"
+                    >
+                      Return to Cart
+                    </Link>
+                  </div>
+                )}
               </div>
             </div>
           </div>

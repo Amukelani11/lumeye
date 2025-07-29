@@ -7,14 +7,17 @@ import { useSearchParams } from "next/navigation"
 import { trackPurchase } from "../../lib/meta-pixel"
 import { trackPurchase as gaTrackPurchase } from "../../lib/google-analytics"
 import { useVisitorTracking } from "../../hooks/useVisitorTracking"
+import { useCart } from "../lib/cart-context"
 
 function OrderConfirmationContent() {
   const searchParams = useSearchParams()
   const orderId = searchParams.get('orderId')
+  const checkoutId = searchParams.get('checkout_id')
   const [loading, setLoading] = useState(true)
   const [orderStatus, setOrderStatus] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const { trackActivity } = useVisitorTracking()
+  const { dispatch } = useCart()
 
   // Track order confirmation page view
   useEffect(() => {
@@ -25,9 +28,11 @@ function OrderConfirmationContent() {
   }, [trackActivity])
 
   useEffect(() => {
-    if (orderId) {
+    const id = orderId || checkoutId
+    if (id) {
       // Check order status from database
-      fetch(`/api/check-payment-status?checkout_id=${orderId}`)
+      const endpoint = orderId ? `/api/check-payment-status?checkout_id=${orderId}` : `/api/check-payment-status?checkout_id=${checkoutId}`
+      fetch(endpoint)
         .then(response => response.json())
         .then(data => {
           if (data.success && data.order) {
@@ -35,6 +40,9 @@ function OrderConfirmationContent() {
             setOrderStatus(order.paymentStatus)
             
             if (order.paymentStatus === 'completed' && order.status === 'confirmed') {
+              // Clear cart after successful payment
+              dispatch({ type: "CLEAR_CART" })
+              
               // Track purchase event for Meta Pixel
               trackPurchase(299, 'ZAR', order.orderNumber)
               
@@ -66,9 +74,9 @@ function OrderConfirmationContent() {
         })
     } else {
       setLoading(false)
-      setError('No order ID provided')
+      setError('No order ID or checkout ID provided')
     }
-  }, [orderId])
+  }, [orderId, checkoutId, dispatch])
 
   if (loading) {
     return (

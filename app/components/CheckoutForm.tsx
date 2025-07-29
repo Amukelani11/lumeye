@@ -147,85 +147,38 @@ export default function CheckoutForm() {
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {}
 
-    // Required field validation
-    const requiredFields = [
-      "email",
-      "firstName",
-      "lastName",
-      "address",
-      "city",
-      "postalCode",
-      "phone",
-    ]
-
-    requiredFields.forEach((field) => {
-      if (!formData[field as keyof FormData].trim()) {
-        newErrors[field] = "This field is required"
-      }
-    })
-
-    // Email validation
-    if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Please enter a valid email address"
+    if (!formData.email) {
+      newErrors.email = 'Email is required'
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'Please enter a valid email address'
     }
 
-    // Phone validation
-    if (formData.phone && !/^\d{10}$/.test(formData.phone.replace(/\s/g, ""))) {
-      newErrors.phone = "Please enter a valid 10-digit phone number"
+    if (!formData.firstName) {
+      newErrors.firstName = 'First name is required'
+    }
+
+    if (!formData.lastName) {
+      newErrors.lastName = 'Last name is required'
+    }
+
+    if (!formData.address) {
+      newErrors.address = 'Address is required'
+    }
+
+    if (!formData.city) {
+      newErrors.city = 'City is required'
+    }
+
+    if (!formData.postalCode) {
+      newErrors.postalCode = 'Postal code is required'
+    }
+
+    if (!formData.phone) {
+      newErrors.phone = 'Phone number is required'
     }
 
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
-  }
-
-  const createOrder = async (checkoutId: string, paymentAmount: number) => {
-    try {
-      const shippingAddress = {
-        first_name: formData.firstName,
-        last_name: formData.lastName,
-        address_line_1: formData.address,
-        city: formData.city,
-        postal_code: formData.postalCode,
-        country: 'ZA'
-      }
-
-      const orderData = {
-        email: formData.email,
-        phone: formData.phone,
-        shippingAddress,
-        paymentMethod: 'yoco',
-        paymentId: checkoutId,
-        paymentAmount: paymentAmount,
-        notes: `Payment processed via Yoco Checkout. Checkout ID: ${checkoutId}`,
-        items: state.items.map(item => ({
-          product_id: item.id,
-          quantity: item.quantity,
-          unit_price: item.price,
-          total_price: item.price * item.quantity,
-          name: item.name,
-          images: [item.image]
-        }))
-      }
-
-      const response = await fetch('/api/orders', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(orderData),
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to create order')
-      }
-
-      const result = await response.json()
-      return result
-    } catch (error) {
-      console.error('Error creating order:', error)
-      throw error
-    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -260,6 +213,8 @@ export default function CheckoutForm() {
         totalPrice: Math.round(item.price * item.quantity * 100) // in cents
       }))
 
+      console.log('Line items being sent:', lineItems)
+
       // Create Yoco checkout
       const checkoutResponse = await fetch('/api/yoco/create-checkout', {
         method: 'POST',
@@ -284,21 +239,12 @@ export default function CheckoutForm() {
 
       if (!checkoutResponse.ok) {
         const errorData = await checkoutResponse.json()
-        throw new Error(errorData.error || 'Failed to create checkout')
+        console.error('Yoco checkout error details:', errorData)
+        throw new Error(errorData.error || errorData.details?.message || 'Failed to create checkout')
       }
 
       const checkoutResult = await checkoutResponse.json()
       console.log('Checkout created successfully:', checkoutResult)
-
-      // Create order in database
-      const orderResult = await createOrder(checkoutResult.checkout.id, total)
-
-      if (!orderResult.success) {
-        throw new Error('Failed to create order')
-      }
-
-      // Clear cart
-      dispatch({ type: "CLEAR_CART" })
 
       // Redirect to Yoco checkout page
       console.log('Redirecting to Yoco checkout:', checkoutResult.checkout.redirectUrl)

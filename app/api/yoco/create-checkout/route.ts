@@ -27,14 +27,38 @@ export async function POST(request: NextRequest) {
     }
 
     const checkoutId = `checkout_${Date.now()}`
-    const baseUrl = process.env.NEXT_PUBLIC_YOCO_BASE_URL || 'http://localhost:3000'
+    
+    // Get the base URL from environment or construct from request
+    let baseUrl = process.env.NEXT_PUBLIC_YOCO_BASE_URL
+    if (!baseUrl) {
+      // Fallback: construct from request headers
+      const protocol = request.headers.get('x-forwarded-proto') || 'http'
+      const host = request.headers.get('host') || 'localhost:3000'
+      baseUrl = `${protocol}://${host}`
+    }
+    
+    // Clean and validate the base URL
+    baseUrl = baseUrl.replace(/\/$/, '') // Remove trailing slash
+    
+    // Ensure the base URL is valid
+    try {
+      new URL(baseUrl)
+    } catch (error) {
+      console.error('Invalid base URL:', baseUrl)
+      return NextResponse.json({ 
+        error: 'Invalid base URL configuration' 
+      }, { status: 500 })
+    }
+    
+    // Construct URLs with proper encoding
+    const cancelUrlFinal = cancelUrl || `${baseUrl}/checkout?payment_status=cancelled&checkout_id=${encodeURIComponent(checkoutId)}`
+    const successUrlFinal = successUrl || `${baseUrl}/order-confirmation?checkout_id=${encodeURIComponent(checkoutId)}`
     
     const checkoutData = {
       amount: Math.round(amount * 100), // Convert to cents
       currency,
-      cancelUrl: cancelUrl || `${baseUrl}/checkout?payment_status=cancelled&checkout_id=${checkoutId}`,
-      successUrl: successUrl || `${baseUrl}/order-confirmation`,
-      failureUrl: failureUrl || `${baseUrl}/checkout?payment_status=failed&checkout_id=${checkoutId}&error_message=Payment was not completed`,
+      cancelUrl: cancelUrlFinal,
+      successUrl: successUrlFinal,
       metadata: {
         ...metadata,
         checkoutId: checkoutId,
@@ -48,6 +72,15 @@ export async function POST(request: NextRequest) {
         }
       })) : []
     }
+
+    console.log('Creating Yoco checkout with data:', {
+      amount: checkoutData.amount,
+      currency: checkoutData.currency,
+      lineItems: checkoutData.lineItems,
+      baseUrl: baseUrl,
+      cancelUrl: cancelUrlFinal,
+      successUrl: successUrlFinal
+    })
 
     const response = await fetch('https://payments.yoco.com/api/checkouts', {
       method: 'POST',

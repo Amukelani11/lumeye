@@ -16,6 +16,41 @@ export async function POST(request: NextRequest) {
 
     const now = new Date().toISOString()
     
+    console.log('Tracking visitor activity:', {
+      sessionId,
+      action,
+      page,
+      email: email ? 'provided' : 'not provided',
+      cartValue,
+      itemsCount: items?.length || 0
+    })
+    
+    // Test database connection and table existence
+    const { data: testData, error: testError } = await supabase
+      .from('visitor_tracking')
+      .select('count')
+      .limit(1)
+    
+    if (testError) {
+      console.error('Database tables not found. Please run the SQL scripts in Supabase:', {
+        error: testError,
+        details: testError?.message || testError?.details || testError?.hint || JSON.stringify(testError) || 'Unknown error',
+        action: 'Please run fix_all_schema_issues.sql in your Supabase SQL Editor'
+      })
+      
+      // Return success to prevent frontend errors, but log the issue
+      const response = NextResponse.json({ success: true, sessionId, note: 'Tracking tables not found' })
+      response.cookies.set('visitor_session', sessionId, {
+        maxAge: 60 * 60 * 24 * 30, // 30 days
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax'
+      })
+      return response
+    }
+    
+    console.log('Database connection test successful')
+    
     // Track visitor activity
     const { error: trackingError } = await supabase
       .from('visitor_tracking')
@@ -32,7 +67,15 @@ export async function POST(request: NextRequest) {
       })
 
     if (trackingError) {
-      console.error('Error tracking visitor:', trackingError)
+      console.error('Error tracking visitor:', {
+        error: trackingError,
+        sessionId,
+        action,
+        page,
+        details: trackingError?.message || trackingError?.details || trackingError?.hint || JSON.stringify(trackingError) || 'Unknown error'
+      })
+    } else {
+      console.log('Visitor tracking successful for session:', sessionId)
     }
 
     // Update live visitors table
@@ -64,7 +107,15 @@ export async function POST(request: NextRequest) {
       })
 
     if (liveError) {
-      console.error('Error updating live visitors:', liveError)
+      console.error('Error updating live visitors:', {
+        error: liveError,
+        sessionId,
+        displayPage,
+        status,
+        details: liveError?.message || liveError?.details || liveError?.hint || JSON.stringify(liveError) || 'Unknown error'
+      })
+    } else {
+      console.log('Live visitors update successful for session:', sessionId)
     }
 
     // Handle specific actions
@@ -77,14 +128,19 @@ export async function POST(request: NextRequest) {
           email: email,
           cart_value: cartValue || 0,
           items: items || [],
-          captured_at: now,
+          last_cart_activity: now,
           status: 'email_captured'
         }, {
           onConflict: 'session_id'
         })
 
       if (emailError) {
-        console.error('Error storing abandoned cart email:', emailError)
+        console.error('Error storing abandoned cart email:', {
+          error: emailError,
+          sessionId,
+          email,
+          details: emailError?.message || emailError?.details || emailError?.hint || JSON.stringify(emailError) || 'Unknown error'
+        })
       }
     }
 
@@ -104,27 +160,59 @@ export async function POST(request: NextRequest) {
         })
 
       if (cartError) {
-        console.error('Error updating cart abandonment:', cartError)
+        console.error('Error updating cart abandonment:', {
+          error: cartError,
+          sessionId,
+          details: cartError?.message || cartError?.details || cartError?.hint || JSON.stringify(cartError) || 'Unknown error'
+        })
       }
     }
 
     if (action === 'checkout_start') {
-      // Update checkout abandonment tracking
-      const { error: checkoutError } = await supabase
-        .from('checkout_abandonments')
-        .upsert({
-          session_id: sessionId,
-          email: email || null,
-          cart_value: cartValue || 0,
-          items: items || [],
-          checkout_started_at: now,
-          status: 'checkout_started'
-        }, {
-          onConflict: 'session_id'
-        })
+      // Update checkout abandonment tracking - using correct field names
+      try {
+        const { error: checkoutError } = await supabase
+          .from('checkout_abandonments')
+          .upsert({
+            session_id: sessionId,
+            email: email || null,
+            cart_value: cartValue || 0,
+            items: items || [],
+            checkout_started_at: now,
+            status: 'checkout_started'
+          }, {
+            onConflict: 'session_id'
+          })
 
-      if (checkoutError) {
-        console.error('Error tracking checkout abandonment:', checkoutError)
+        if (checkoutError) {
+          console.error('Error tracking checkout abandonment:', {
+            error: checkoutError,
+            sessionId,
+            details: checkoutError?.message || checkoutError?.details || checkoutError?.hint || JSON.stringify(checkoutError) || 'Unknown error'
+          })
+          
+          // Try alternative approach if cart_value column doesn't exist
+          if (checkoutError.message && checkoutError.message.includes('cart_value')) {
+            console.log('Attempting fallback checkout tracking without cart_value...')
+            const { error: fallbackError } = await supabase
+              .from('checkout_abandonments')
+              .upsert({
+                session_id: sessionId,
+                email: email || null,
+                items: items || [],
+                checkout_started_at: now,
+                status: 'checkout_started'
+              }, {
+                onConflict: 'session_id'
+              })
+            
+            if (fallbackError) {
+              console.error('Fallback checkout tracking also failed:', fallbackError)
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Exception in checkout tracking:', error)
       }
     }
 
