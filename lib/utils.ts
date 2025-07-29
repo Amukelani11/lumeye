@@ -5,17 +5,16 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-// Hardcoded South African timezone (UTC+2)
+// South African timezone (UTC+2) - convert from UTC to SA time
 export function formatSATime(date: string | Date, options?: Intl.DateTimeFormatOptions) {
   try {
     const saDate = new Date(date)
     if (isNaN(saDate.getTime())) {
       return 'Invalid date'
     }
-    // Add 2 hours for South African time (UTC+2)
-    saDate.setHours(saDate.getHours() + 2)
     
     const defaultOptions: Intl.DateTimeFormatOptions = {
+      timeZone: 'Africa/Johannesburg',
       year: 'numeric',
       month: '2-digit',
       day: '2-digit',
@@ -37,10 +36,9 @@ export function formatSATimeOnly(date: string | Date) {
     if (isNaN(saDate.getTime())) {
       return 'Invalid date'
     }
-    // Add 2 hours for South African time (UTC+2)
-    saDate.setHours(saDate.getHours() + 2)
     
     return saDate.toLocaleTimeString('en-US', { 
+      timeZone: 'Africa/Johannesburg',
       hour12: true,
       hour: 'numeric',
       minute: '2-digit',
@@ -57,10 +55,9 @@ export function formatSADateOnly(date: string | Date) {
     if (isNaN(saDate.getTime())) {
       return 'Invalid date'
     }
-    // Add 2 hours for South African time (UTC+2)
-    saDate.setHours(saDate.getHours() + 2)
     
     return saDate.toLocaleDateString('en-US', { 
+      timeZone: 'Africa/Johannesburg',
       year: 'numeric',
       month: '2-digit',
       day: '2-digit'

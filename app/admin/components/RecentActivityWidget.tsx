@@ -13,15 +13,15 @@ export default function RecentActivityWidget() {
         const response = await fetch('/api/admin/visitor-analytics')
         const data = await response.json()
         
-        // Format the activities for display with hardcoded South African timezone
+        // Format the activities for display with proper South African timezone
         const formattedActivities = data.recentActivity?.map((activity: any) => {
           try {
             const saDate = new Date(activity.time)
             if (isNaN(saDate.getTime())) {
               return `${activity.action} on ${activity.page} at Invalid date`
             }
-            saDate.setHours(saDate.getHours() + 2) // Add 2 hours for SA time
             const timestamp = saDate.toLocaleTimeString('en-US', { 
+              timeZone: 'Africa/Johannesburg',
               hour12: true,
               hour: 'numeric',
               minute: '2-digit',

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Sidebar from "../components/Sidebar"
-import { Search, Mail, Download, Filter, Calendar, Users, Tag, Eye, AlertTriangle } from "lucide-react"
+import { Search, Mail, Download, Filter, Calendar, Users, Tag, Eye, AlertTriangle, ShoppingCart, CreditCard } from "lucide-react"
 import { formatSATime } from "../../../lib/utils"
 
 interface EmailCapture {
@@ -67,33 +67,75 @@ export default function EmailCapturesPage() {
     try {
       const response = await fetch(`/api/admin/email-captures/${emailCapture.id}/send-failed-payment`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          items: [{
-            name: 'Lumeye Under Eye Serum',
-            quantity: 1,
-            price: 299.00
-          }],
-          totalAmount: 299.00,
-          paymentMethod: 'Credit Card',
-          errorMessage: 'Payment was declined. Please check your card details and try again.'
-        }),
       })
 
       if (response.ok) {
         alert('Failed payment email sent successfully!')
-        await fetchEmailCaptures() // Refresh the list
       } else {
         const errorData = await response.json()
-        alert(`Error sending email: ${errorData.error || errorData.details || 'Unknown error'}`)
+        alert(`Error sending failed payment email: ${errorData.error || 'Unknown error'}`)
       }
     } catch (error) {
       console.error('Error sending failed payment email:', error)
-      alert('Error sending email. Please try again.')
+      alert('Error sending failed payment email. Please check the console for details.')
     } finally {
-      setSendingEmail(null)
+      setSendingEmail('')
+    }
+  }
+
+  const sendAbandonedCartEmail = async (emailCapture: EmailCapture) => {
+    setSendingEmail(emailCapture.email)
+    try {
+      const response = await fetch('/api/test-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: emailCapture.email,
+          type: 'abandoned_cart'
+        }),
+      })
+
+      if (response.ok) {
+        alert('Abandoned cart email sent successfully!')
+      } else {
+        const errorData = await response.json()
+        alert(`Error sending abandoned cart email: ${errorData.error || 'Unknown error'}`)
+      }
+    } catch (error) {
+      console.error('Error sending abandoned cart email:', error)
+      alert('Error sending abandoned cart email. Please check the console for details.')
+    } finally {
+      setSendingEmail('')
+    }
+  }
+
+  const sendCheckoutAbandonmentEmail = async (emailCapture: EmailCapture) => {
+    setSendingEmail(emailCapture.email)
+    try {
+      const response = await fetch('/api/test-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: emailCapture.email,
+          type: 'checkout_abandonment'
+        }),
+      })
+
+      if (response.ok) {
+        alert('Checkout abandonment email sent successfully!')
+      } else {
+        const errorData = await response.json()
+        alert(`Error sending checkout abandonment email: ${errorData.error || 'Unknown error'}`)
+      }
+    } catch (error) {
+      console.error('Error sending checkout abandonment email:', error)
+      alert('Error sending checkout abandonment email. Please check the console for details.')
+    } finally {
+      setSendingEmail('')
     }
   }
 
@@ -407,8 +449,8 @@ export default function EmailCapturesPage() {
                             if (isNaN(saDate.getTime())) {
                               return 'Invalid date'
                             }
-                            saDate.setHours(saDate.getHours() + 2) // Add 2 hours for SA time
                             return saDate.toLocaleString('en-US', { 
+                              timeZone: 'Africa/Johannesburg',
                               year: 'numeric',
                               month: '2-digit',
                               day: '2-digit',
@@ -429,6 +471,30 @@ export default function EmailCapturesPage() {
                             title="Open Email Client"
                           >
                             <Mail className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => sendAbandonedCartEmail(emailCapture)}
+                            disabled={sendingEmail === emailCapture.email}
+                            className="text-orange-600 hover:text-orange-900 flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Send Abandoned Cart Email"
+                          >
+                            {sendingEmail === emailCapture.email ? (
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-orange-600"></div>
+                            ) : (
+                              <ShoppingCart className="w-4 h-4" />
+                            )}
+                          </button>
+                          <button
+                            onClick={() => sendCheckoutAbandonmentEmail(emailCapture)}
+                            disabled={sendingEmail === emailCapture.email}
+                            className="text-green-600 hover:text-green-900 flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Send Checkout Abandonment Email"
+                          >
+                            {sendingEmail === emailCapture.email ? (
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600"></div>
+                            ) : (
+                              <CreditCard className="w-4 h-4" />
+                            )}
                           </button>
                           <button
                             onClick={() => sendFailedPaymentEmail(emailCapture)}

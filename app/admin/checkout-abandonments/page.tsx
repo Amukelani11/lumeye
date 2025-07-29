@@ -272,8 +272,8 @@ export default function CheckoutAbandonmentsPage() {
                             if (isNaN(saDate.getTime())) {
                               return 'Invalid date'
                             }
-                            saDate.setHours(saDate.getHours() + 2) // Add 2 hours for SA time
                             return saDate.toLocaleString('en-US', { 
+                              timeZone: 'Africa/Johannesburg',
                               year: 'numeric',
                               month: '2-digit',
                               day: '2-digit',

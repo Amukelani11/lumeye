@@ -144,8 +144,8 @@ export default function VisitorAnalyticsWidget() {
                     if (isNaN(saDate.getTime())) {
                       return 'Invalid date'
                     }
-                    saDate.setHours(saDate.getHours() + 2) // Add 2 hours for SA time
                     return saDate.toLocaleTimeString('en-US', { 
+                      timeZone: 'Africa/Johannesburg',
                       hour12: true,
                       hour: 'numeric',
                       minute: '2-digit',
