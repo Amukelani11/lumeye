@@ -35,13 +35,13 @@ export async function POST(
     // Send checkout abandonment email
     const emailResult = await EmailService.sendCheckoutAbandonmentEmail({
       customerEmail: abandonment.email,
-      checkoutItems: Array.isArray(abandonment.checkout_data) ? abandonment.checkout_data.map((item: any) => ({
-        name: item.product_name || item.name || 'Lumeye Under Eye Serum',
+      checkoutItems: Array.isArray(abandonment.items) ? abandonment.items.map((item: any) => ({
+        name: item.name || item.product_name || 'Lumeye Product',
         quantity: item.quantity || 1,
-        price: item.unit_price || item.price || 0,
-        image: item.product_image || item.image
+        price: item.price || item.unit_price || 0,
+        image: item.image || item.product_image
       })) : [],
-      totalValue: abandonment.total_value,
+      totalValue: abandonment.cart_value || 0,
       recoveryUrl: recoveryUrl
     })
 

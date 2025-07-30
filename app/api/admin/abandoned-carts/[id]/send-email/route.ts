@@ -49,13 +49,13 @@ export async function POST(
     // Send abandoned cart email
     const emailResult = await EmailService.sendAbandonedCartEmail({
       customerEmail: cart.email,
-      cartItems: Array.isArray(cart.cart_data) ? cart.cart_data.map((item: any) => ({
-        name: item.product_name || item.name || 'Lumeye Under Eye Serum',
+      cartItems: Array.isArray(cart.items) ? cart.items.map((item: any) => ({
+        name: item.name || item.product_name || 'Lumeye Product',
         quantity: item.quantity || 1,
-        price: item.unit_price || item.price || 0,
-        image: item.product_image || item.image
+        price: item.price || item.unit_price || 0,
+        image: item.image || item.product_image
       })) : [],
-      totalValue: cart.total_value,
+      totalValue: cart.cart_value || 0,
       recoveryUrl: recoveryUrl
     })
 

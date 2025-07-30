@@ -122,15 +122,27 @@ function CheckoutContent() {
     }
   }, [searchParams, trackActivity, state.items.length])
 
-  // Track checkout page view
+  // Track checkout page view and checkout start
   useEffect(() => {
     const cartValue = state.items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+    
+    // Track page view
     trackActivity({
       action: 'page_view',
       page: '/checkout',
       cartValue,
       items: state.items
     })
+    
+    // Track checkout start (only if cart has items)
+    if (state.items.length > 0) {
+      trackActivity({
+        action: 'checkout_start',
+        page: '/checkout',
+        cartValue,
+        items: state.items
+      })
+    }
   }, [trackActivity, state.items])
 
   if (state.items.length === 0) {

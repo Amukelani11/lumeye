@@ -147,6 +147,26 @@ export async function POST(request: NextRequest) {
       // Don't fail the order creation if payment record creation fails
     }
 
+    // Mark checkout abandonment as recovered
+    try {
+      const { error: recoveryError } = await supabase
+        .from('checkout_abandonments')
+        .update({
+          status: 'converted',
+          converted_at: new Date().toISOString()
+        })
+        .eq('email', email)
+        .eq('status', 'checkout_started')
+
+      if (recoveryError) {
+        console.error('Error marking checkout abandonment as recovered:', recoveryError)
+      } else {
+        console.log('Checkout abandonment marked as recovered for email:', email)
+      }
+    } catch (recoveryError) {
+      console.error('Error in checkout abandonment recovery:', recoveryError)
+    }
+
     // Send order confirmation email with tracking number
     try {
       await EmailService.sendOrderConfirmation({
