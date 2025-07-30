@@ -36,6 +36,10 @@ export function DiscountProvider({ children }: { children: React.ReactNode }) {
       setDiscountCode(code)
       setDiscountApplied(true)
       setDiscountAmount(subtotal * 0.1)
+    } else if (code === '50OFF') {
+      setDiscountCode(code)
+      setDiscountApplied(true)
+      setDiscountAmount(subtotal * 0.5) // 50% off
     } else if (code === 'GLOWDUO') {
       setDiscountCode(code)
       setDiscountApplied(true)

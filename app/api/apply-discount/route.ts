@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate discount code
-    const validDiscountCodes = ['WELCOME10']
+    const validDiscountCodes = ['WELCOME10', '50OFF']
     
     if (!validDiscountCodes.includes(discountCode.toUpperCase())) {
       return NextResponse.json({ 
@@ -23,8 +23,8 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // For WELCOME10, allow any email to use it (one-time use per email)
-    if (discountCode.toUpperCase() === 'WELCOME10') {
+    // For WELCOME10 and 50OFF, allow any email to use it (one-time use per email)
+    if (discountCode.toUpperCase() === 'WELCOME10' || discountCode.toUpperCase() === '50OFF') {
       // Check if this email has already used this discount (only mark as used after checkout completion)
       const { data: emailCapture, error: checkError } = await supabase
         .from('email_captures')
@@ -124,8 +124,15 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Calculate discount amount (10% for WELCOME10)
-    const discountAmount = 0.10 // 10%
+    // Calculate discount amount based on code
+    let discountAmount
+    if (discountCode.toUpperCase() === 'WELCOME10') {
+      discountAmount = 0.10 // 10%
+    } else if (discountCode.toUpperCase() === '50OFF') {
+      discountAmount = 0.50 // 50%
+    } else {
+      discountAmount = 0.10 // Default to 10%
+    }
 
     return NextResponse.json({
       success: true,
