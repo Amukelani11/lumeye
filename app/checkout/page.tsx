@@ -82,7 +82,7 @@ function CheckoutContent() {
         }
       }
     }
-  }, [state.items.length, cartRestored, dispatch, searchParams])
+  }, [state.items.length, cartRestored, dispatch, searchParams, applyDiscount])
 
   // Check for payment status parameters
   useEffect(() => {
@@ -212,13 +212,11 @@ function CheckoutContent() {
           </div>
         )}
 
-        <DiscountProvider>
-          {bundleApplied && <BundleBanner />}
-          <div className="grid lg:grid-cols-2 gap-12">
-            <CheckoutForm />
-            <CheckoutSummary />
-          </div>
-        </DiscountProvider>
+        {bundleApplied && <BundleBanner />}
+        <div className="grid lg:grid-cols-2 gap-12">
+          <CheckoutForm />
+          <CheckoutSummary />
+        </div>
       </main>
       <Footer />
     </>
@@ -227,12 +225,17 @@ function CheckoutContent() {
 
 export default function CheckoutPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600"></div>
-      </div>
-    }>
-      <CheckoutContent />
-    </Suspense>
+    <DiscountProvider>
+      <Suspense fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600"></div>
+        </div>
+      }>
+        <CheckoutContent />
+      </Suspense>
+    </DiscountProvider>
   )
 }
+
+// Force dynamic rendering to prevent static generation issues
+export const dynamic = 'force-dynamic'
