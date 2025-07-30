@@ -11,8 +11,8 @@ export async function POST(request: NextRequest) {
 
     // If a specific discount code is provided, validate it
     if (discountCode) {
-      // For now, we'll support WELCOME10 as a valid discount code
-      const validDiscountCodes = ['WELCOME10']
+      // Support WELCOME10 and 50OFF discount codes
+      const validDiscountCodes = ['WELCOME10', '50OFF']
       
       if (!validDiscountCodes.includes(discountCode.toUpperCase())) {
         return NextResponse.json({ 
@@ -21,8 +21,8 @@ export async function POST(request: NextRequest) {
         })
       }
 
-      // For WELCOME10, allow any email to use it (one-time use per email)
-      if (discountCode.toUpperCase() === 'WELCOME10') {
+      // For WELCOME10 and 50OFF, allow any email to use it (one-time use per email)
+      if (discountCode.toUpperCase() === 'WELCOME10' || discountCode.toUpperCase() === '50OFF') {
         // Check if this email has already used this discount in a completed checkout
         const { data: emailCapture, error } = await supabase
           .from('email_captures')
