@@ -9,7 +9,7 @@ export default function CheckoutSummary() {
   const { discountApplied, discountAmount, discountCode } = useDiscount()
 
   const subtotal = state.total
-  const shipping = 0 // Free shipping for all orders
+  const shipping: number = 0 // Free shipping for all orders
   const total = subtotal + shipping - (discountApplied ? discountAmount : 0)
 
   return (

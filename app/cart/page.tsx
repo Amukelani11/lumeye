@@ -42,7 +42,7 @@ export default function CartPage() {
   }
 
   const subtotal = state.total
-  const shipping = 0 // Free shipping for all orders
+  const shipping: number = 0 // Free shipping for all orders
   const total = subtotal + shipping
 
   return (
