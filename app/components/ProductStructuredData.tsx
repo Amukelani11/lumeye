@@ -19,12 +19,12 @@ export default function ProductStructuredData() {
     ],
     "offers": {
       "@type": "Offer",
-      "price": "299.00",
+      "price": "159.00",
       "priceCurrency": "ZAR",
       "availability": "https://schema.org/InStock",
       "priceSpecification": {
         "@type": "UnitPriceSpecification",
-        "price": "299.00",
+        "price": "159.00",
         "priceCurrency": "ZAR",
         "referenceQuantity": {
           "@type": "QuantitativeValue",
@@ -32,8 +32,8 @@ export default function ProductStructuredData() {
           "unitCode": "ML"
         }
       },
-      "highPrice": "599.00",
-      "lowPrice": "299.00",
+      "highPrice": "299.00",
+      "lowPrice": "159.00",
       "priceValidUntil": "2024-12-31",
       "seller": {
         "@type": "Organization",
@@ -146,17 +146,17 @@ export default function ProductStructuredData() {
       {
         "@type": "PropertyValue",
         "name": "Original Price",
-        "value": "R599"
-      },
-      {
-        "@type": "PropertyValue",
-        "name": "Sale Price",
         "value": "R299"
       },
       {
         "@type": "PropertyValue",
+        "name": "Sale Price",
+        "value": "R159"
+      },
+      {
+        "@type": "PropertyValue",
         "name": "Savings",
-        "value": "R300 (50% off)"
+        "value": "R140 (47% off)"
       }
     ]
   }

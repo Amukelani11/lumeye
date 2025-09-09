@@ -31,7 +31,7 @@ function CheckoutContent() {
         {
           id: "lumeye-serum",
           name: "Lumeye Under Eye Serum",
-          price: 299,
+          price: 159,
           image: "/lumeye shot 5.png",
           quantity: 1
         },

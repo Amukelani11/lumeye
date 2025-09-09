@@ -44,17 +44,17 @@ function OrderConfirmationContent() {
               dispatch({ type: "CLEAR_CART" })
               
               // Track purchase event for Meta Pixel
-              trackPurchase(299, 'ZAR', order.orderNumber)
+              trackPurchase(159, 'ZAR', order.orderNumber)
               
               // Track purchase event for Google Analytics
               gaTrackPurchase({
                 transaction_id: order.orderNumber,
-                value: 299,
+                value: 159,
                 currency: 'ZAR',
                 items: [{
                   item_id: 'lumeye-serum',
                   item_name: 'Lumeye Under Eye Serum',
-                  price: 299,
+                  price: 159,
                   quantity: 1
                 }]
               })

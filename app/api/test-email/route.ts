@@ -20,9 +20,9 @@ export async function POST(request: NextRequest) {
           cartItems: [{
             name: 'Lumeye Under Eye Serum',
             quantity: quantity,
-            price: 299.00
+            price: 159.00
           }],
-          totalValue: 299.00 * quantity,
+          totalValue: 159.00 * quantity,
           recoveryUrl: `${process.env.NEXT_PUBLIC_YOCO_BASE_URL || 'http://localhost:3000'}/cart?session=test-session`
         })
         break
@@ -33,9 +33,9 @@ export async function POST(request: NextRequest) {
           checkoutItems: [{
             name: 'Lumeye Under Eye Serum',
             quantity: quantity,
-            price: 299.00
+            price: 159.00
           }],
-          totalValue: 299.00 * quantity,
+          totalValue: 159.00 * quantity,
           recoveryUrl: `${process.env.NEXT_PUBLIC_YOCO_BASE_URL || 'http://localhost:3000'}/checkout?session=test-session`
         })
         break
@@ -43,11 +43,11 @@ export async function POST(request: NextRequest) {
       case 'failed_payment':
         result = await EmailService.sendFailedPaymentEmail({
           customerEmail: email,
-          totalAmount: 299.00 * quantity,
+          totalAmount: 159.00 * quantity,
           items: [{
             name: 'Lumeye Under Eye Serum',
             quantity: quantity,
-            price: 299.00
+            price: 159.00
           }],
           paymentMethod: 'Credit Card',
           retryUrl: `${process.env.NEXT_PUBLIC_YOCO_BASE_URL || 'http://localhost:3000'}/checkout`,

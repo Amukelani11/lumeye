@@ -51,7 +51,7 @@ export default function UrgencyCTA() {
 
         {/* Main Headline */}
         <h2 className="font-dm-sans text-4xl lg:text-5xl font-bold mb-6">
-          Only R299
+          Only R159
           <span className="block text-2xl lg:text-3xl font-normal mt-2 opacity-90">
             Free Nationwide Shipping
           </span>
@@ -93,7 +93,7 @@ export default function UrgencyCTA() {
             href="/product"
             className="bg-white text-pink-600 px-8 py-4 rounded-full font-bold text-lg hover:bg-gray-100 transition-all duration-300 inline-block shadow-lg hover:shadow-xl transform hover:scale-105"
           >
-            Shop Now - R299
+            Shop Now - R159
           </Link>
           <div className="text-center sm:text-left">
             <p className="text-sm opacity-75">No risk - 30-day guarantee</p>

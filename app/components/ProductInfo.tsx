@@ -21,7 +21,7 @@ export default function ProductInfo() {
     trackViewItem({
       item_id: 'lumeye-serum',
       item_name: 'Lumeye Under Eye Serum',
-      price: 299,
+      price: 159,
       currency: 'ZAR',
       quantity: 1
     })
@@ -41,24 +41,24 @@ export default function ProductInfo() {
         payload: {
           id: "lumeye-serum",
           name: "Lumeye Under Eye Serum",
-          price: 299,
+          price: 159,
           image: "/lumeye shot 5.png",
         },
       })
     }
     // Track add to cart event
-    trackAddToCart(299 * quantity, 'ZAR', 'Lumeye Under Eye Serum')
+    trackAddToCart(159 * quantity, 'ZAR', 'Lumeye Under Eye Serum')
     gaTrackAddToCart({
       item_id: 'lumeye-serum',
       item_name: 'Lumeye Under Eye Serum',
-      price: 299,
+      price: 159,
       currency: 'ZAR',
       quantity: quantity
     })
     trackActivity({
       action: 'cart_add',
-      cartValue: 299 * quantity,
-      items: [{ name: 'Lumeye Under Eye Serum', quantity, price: 299 }]
+      cartValue: 159 * quantity,
+      items: [{ name: 'Lumeye Under Eye Serum', quantity, price: 159 }]
     })
     // Reset quantity after adding to cart
     setQuantity(1)
@@ -71,30 +71,30 @@ export default function ProductInfo() {
       payload: {
         id: "lumeye-serum",
         name: "Lumeye Under Eye Serum",
-        price: 299,
+        price: 159,
         image: "/lumeye shot 5.png",
         quantity: quantity,
       },
     })
     // Track initiate checkout event
-    trackInitiateCheckout(299 * quantity, 'ZAR')
+    trackInitiateCheckout(159 * quantity, 'ZAR')
     gaTrackBeginCheckout([{
       item_id: 'lumeye-serum',
       item_name: 'Lumeye Under Eye Serum',
-      price: 299,
+      price: 159,
       quantity: quantity
     }], 'ZAR')
     trackActivity({
       action: 'checkout_start',
-      cartValue: 299 * quantity,
-      items: [{ name: 'Lumeye Under Eye Serum', quantity, price: 299 }]
+      cartValue: 159 * quantity,
+      items: [{ name: 'Lumeye Under Eye Serum', quantity, price: 159 }]
     })
     // Navigate to checkout
     router.push('/checkout')
   }
 
-  const originalPrice = 599 // Compared at price
-  const currentPrice = 299
+  const originalPrice = 299 // Compared at price
+  const currentPrice = 159
   const savings = originalPrice - currentPrice
   const savingsPercentage = Math.round((savings / originalPrice) * 100)
 
@@ -136,14 +136,14 @@ export default function ProductInfo() {
             <div className="w-16 h-16 bg-white rounded-lg border-2 border-purple-300 flex items-center justify-center">
               <div className="w-8 h-8 bg-purple-200 rounded"></div>
             </div>
-            <span className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs font-medium">R299</span>
+            <span className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs font-medium">R159</span>
           </div>
           <span className="text-2xl font-bold text-gray-400">+</span>
           <div className="relative">
             <div className="w-16 h-16 bg-white rounded-lg border-2 border-purple-300 flex items-center justify-center">
               <div className="w-8 h-8 bg-purple-200 rounded"></div>
             </div>
-            <span className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs font-medium">R299</span>
+            <span className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs font-medium">R159</span>
           </div>
           <span className="text-2xl font-bold text-gray-400">=</span>
           <div className="relative">

@@ -583,7 +583,7 @@ VALUES (
     'lumeye-under-eye-serum',
     'Advanced under-eye serum that reduces dark circles, puffiness, and fine lines. Formulated with powerful peptides and natural ingredients.',
     'Reduce dark circles and puffiness with our advanced under-eye serum.',
-    299.00,
+    159.00,
     100,
     true
 ) ON CONFLICT (slug) DO NOTHING;

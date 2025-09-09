@@ -175,7 +175,7 @@ export default function Testimonials() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <div className="text-center">
-              <div className="text-3xl font-bold text-purple-600 mb-1">R299</div>
+              <div className="text-3xl font-bold text-purple-600 mb-1">R159</div>
               <div className="text-sm text-gray-500">Eye Serum</div>
             </div>
             <div className="text-center">
