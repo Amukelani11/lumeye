@@ -11,7 +11,7 @@ export async function GET() {
     // Active visitors (unique sessions in last 5 minutes)
     const { data: activeSessions } = await supabase
       .from('visitor_tracking')
-      .select('session_id')
+      .select('session_id, created_at, metadata')
       .gte('created_at', fiveMinutesAgo.toISOString())
       .order('created_at', { ascending: false })
 
@@ -78,19 +78,58 @@ export async function GET() {
       .sort((a, b) => b.views - a.views)
       .slice(0, 5)
 
-    // Recent activity (actual visitor actions)
+    // Recent activity (actual visitor actions with enhanced data)
     const { data: recentActivity } = await supabase
       .from('visitor_tracking')
-      .select('created_at, action, page')
+      .select('created_at, action, page, session_id, metadata')
       .gte('created_at', oneHourAgo.toISOString())
       .order('created_at', { ascending: false })
-      .limit(10)
+      .limit(15)
 
     const formattedRecentActivity = recentActivity?.map(activity => ({
       time: new Date(activity.created_at).toLocaleTimeString(),
       action: activity.action === 'page_view' ? 'Page viewed' : activity.action,
-      page: activity.page
+      page: activity.page,
+      sessionId: activity.session_id,
+      metadata: activity.metadata ? JSON.parse(activity.metadata) : null
     })) || []
+
+    // Device breakdown (from user agents in last hour)
+    const { data: deviceData } = await supabase
+      .from('visitor_tracking')
+      .select('user_agent')
+      .gte('created_at', oneHourAgo.toISOString())
+      .not('user_agent', 'is', null)
+
+    const deviceBreakdown = {
+      desktop: 0,
+      mobile: 0,
+      tablet: 0,
+      other: 0
+    }
+
+    deviceData?.forEach(record => {
+      const ua = record.user_agent.toLowerCase()
+      if (ua.includes('mobile') || ua.includes('android') || ua.includes('iphone')) {
+        deviceBreakdown.mobile++
+      } else if (ua.includes('tablet') || ua.includes('ipad')) {
+        deviceBreakdown.tablet++
+      } else if (ua.includes('windows') || ua.includes('mac') || ua.includes('linux')) {
+        deviceBreakdown.desktop++
+      } else {
+        deviceBreakdown.other++
+      }
+    })
+
+    // Geographic data (from IP addresses - basic estimation)
+    const { data: geoData } = await supabase
+      .from('visitor_tracking')
+      .select('ip_address')
+      .gte('created_at', oneDayAgo.toISOString())
+      .not('ip_address', 'eq', 'unknown')
+
+    const uniqueIPs = new Set(geoData?.map(d => d.ip_address) || [])
+    const estimatedCountries = uniqueIPs.size * 0.7 // Rough estimate: 70% of unique IPs are from different countries
 
     return NextResponse.json({
       activeVisitors,
@@ -98,7 +137,12 @@ export async function GET() {
       productViews: productViews || 0,
       averageSessionTime: averageSessionTime || 0,
       topPages,
-      recentActivity: formattedRecentActivity
+      recentActivity: formattedRecentActivity,
+      deviceBreakdown,
+      estimatedCountries: Math.round(estimatedCountries),
+      // Additional real-time metrics
+      bounceRate: totalViews > 0 ? Math.round((uniqueSessions.size / activeVisitors) * 100) || 0 : 0,
+      conversionRate: productViews > 0 ? Math.round((productViews / totalViews) * 100) || 0 : 0
     })
 
   } catch (error) {

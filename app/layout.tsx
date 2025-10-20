@@ -4,6 +4,7 @@ import { DM_Sans, Inter } from "next/font/google"
 import "./globals.css"
 import Header from "./components/Header"
 import { CartProvider } from "./lib/cart-context"
+import VisitorTracker from "./components/VisitorTracker"
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -87,6 +88,7 @@ export default function RootLayout({
     <html lang="en" className={`${dmSans.variable} ${inter.variable}`}>
       <body className="font-inter bg-white">
         <CartProvider>
+          <VisitorTracker />
           <Header />
           {children}
         </CartProvider>
