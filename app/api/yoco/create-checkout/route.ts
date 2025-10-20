@@ -12,9 +12,9 @@ export async function POST(request: NextRequest) {
       lineItems 
     } = await request.json()
 
-    if (!amount || amount < 200) { // Minimum R2.00 in cents
-      return NextResponse.json({ 
-        error: 'Amount is required and must be at least R2.00 (200 cents)' 
+    if (!amount || amount < 2) { // Minimum R2.00 in rand
+      return NextResponse.json({
+        error: 'Amount is required and must be at least R2.00'
       }, { status: 400 })
     }
 

@@ -166,6 +166,10 @@ export default function CheckoutForm() {
       const total = subtotal + shipping
 
       console.log('Creating Yoco checkout for amount:', total)
+      console.log('Cart items:', state.items)
+      console.log('Cart total:', state.total)
+      console.log('Amount in rand:', total)
+      console.log('Amount in cents:', Math.round(total * 100))
 
       // Create line items for display
       const lineItems = state.items.map(item => ({
