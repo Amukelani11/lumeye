@@ -22,7 +22,7 @@ const faqs = [
   {
     question: "Where do you deliver?",
     answer:
-      "We deliver nationwide across South Africa. Standard shipping is free for orders over R250. We also offer express shipping options for faster delivery. International shipping is available to select countries.",
+      "We deliver nationwide across South Africa with free shipping on all orders. We also offer express shipping options for faster delivery. International shipping is available to select countries.",
   },
   {
     question: "How quickly will I see results?",

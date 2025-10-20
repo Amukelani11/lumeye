@@ -7,7 +7,7 @@ export default function CheckoutSummary() {
   const { state } = useCart()
 
   const subtotal = state.total
-  const shipping = subtotal >= 250 ? 0 : 50
+  const shipping = 0 as number // Free shipping for all orders
   const total = subtotal + shipping
 
   return (
@@ -54,11 +54,6 @@ export default function CheckoutSummary() {
         </div>
       </div>
 
-      {subtotal < 250 && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mt-6">
-          <p className="text-sm text-yellow-800">Add R{(250 - subtotal).toFixed(2)} more for free shipping!</p>
-        </div>
-      )}
 
       <div className="mt-6 text-center text-sm text-gray-600">
         <p>🔒 Your payment information is secure and encrypted</p>

@@ -162,7 +162,7 @@ export default function CheckoutForm() {
     try {
       // Calculate total amount
       const subtotal = state.total
-      const shipping = subtotal >= 250 ? 0 : 50
+      const shipping = 0 as number // Free shipping for all orders
       const total = subtotal + shipping
 
       console.log('Creating Yoco checkout for amount:', total)
