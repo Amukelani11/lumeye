@@ -141,8 +141,8 @@ export async function GET() {
       deviceBreakdown,
       estimatedCountries: Math.round(estimatedCountries),
       // Additional real-time metrics
-      bounceRate: totalViews > 0 ? Math.round((uniqueSessions.size / activeVisitors) * 100) || 0 : 0,
-      conversionRate: productViews > 0 ? Math.round((productViews / totalViews) * 100) || 0 : 0
+      bounceRate: totalViews && totalViews > 0 ? Math.round((activeVisitors / totalViews) * 100) || 0 : 0,
+      conversionRate: totalViews && productViews && totalViews > 0 ? Math.round((productViews / totalViews) * 100) || 0 : 0
     })
 
   } catch (error) {

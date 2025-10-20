@@ -3,6 +3,8 @@
 import { useEffect, useRef, useCallback } from 'react'
 import { usePathname } from 'next/navigation'
 
+// This hook is designed to run only on the client side via dynamic imports
+
 interface TrackingData {
   sessionId: string
   page: string
@@ -32,9 +34,9 @@ const DEFAULT_OPTIONS: Required<VisitorTrackingOptions> = {
 export function useVisitorTracking(options: VisitorTrackingOptions = {}) {
   const opts = { ...DEFAULT_OPTIONS, ...options }
   const pathname = usePathname()
-  const sessionIdRef = useRef<string>()
-  const lastTrackedPageRef = useRef<string>()
-  const retryTimeoutRef = useRef<NodeJS.Timeout>()
+  const sessionIdRef = useRef<string>('')
+  const lastTrackedPageRef = useRef<string>('')
+  const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const isOnlineRef = useRef(true)
 
   // Generate or retrieve session ID

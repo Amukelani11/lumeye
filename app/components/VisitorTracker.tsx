@@ -1,6 +1,6 @@
 "use client"
 
-import { useVisitorTracking } from "../hooks/useVisitorTracking"
+import { useVisitorTracking } from "../../hooks/useVisitorTracking"
 
 // This component handles visitor tracking for the entire application
 export default function VisitorTracker() {
