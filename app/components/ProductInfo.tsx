@@ -21,7 +21,7 @@ export default function ProductInfo() {
         payload: {
           id: "lumeye-serum",
           name: "Lumeye Under Eye Serum",
-          price: 299,
+          price: 159,
           image: "/lumeye shot 5.png",
         },
       })
@@ -45,8 +45,8 @@ export default function ProductInfo() {
     router.push('/checkout')
   }
 
-  const originalPrice = 599 // Compared at price
-  const currentPrice = 299
+  const originalPrice = 318 // Compared at price
+  const currentPrice = 159
   const savings = originalPrice - currentPrice
   const savingsPercentage = Math.round((savings / originalPrice) * 100)
 

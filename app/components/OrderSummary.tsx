@@ -23,14 +23,14 @@ export default function OrderSummary() {
             <p className="text-gray-600 text-sm">Quantity: 1</p>
           </div>
           <div className="text-right">
-            <p className="font-semibold text-gray-900">R299.00</p>
+            <p className="font-semibold text-gray-900">R159.00</p>
           </div>
         </div>
 
         <div className="border-t pt-6 space-y-3">
           <div className="flex justify-between text-gray-600">
             <span>Subtotal</span>
-            <span>R299.00</span>
+            <span>R159.00</span>
           </div>
           <div className="flex justify-between text-gray-600">
             <span>Shipping</span>
@@ -38,7 +38,7 @@ export default function OrderSummary() {
           </div>
           <div className="border-t pt-3 flex justify-between font-semibold text-lg text-gray-900">
             <span>Total</span>
-            <span>R299.00</span>
+            <span>R159.00</span>
           </div>
         </div>
 

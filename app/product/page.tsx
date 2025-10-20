@@ -9,15 +9,15 @@ import Footer from "../components/Footer"
 import BeforeAfterGallery from "../components/BeforeAfterGallery"
 
 export const metadata: Metadata = {
-  title: "Lumeye Under Eye Serum | Buy Online | R299 (Save R300) | Free Shipping South Africa",
-  description: "Buy Lumeye Under Eye Serum online. Was R599, Now R299 - Save R300! Clinically proven to reduce puffiness and brighten dark circles in 60 seconds. 4.9/5 stars from 127+ reviews. Dermatologist tested, cruelty-free. Free shipping across South Africa.",
+  title: "Lumeye Under Eye Serum | Buy Online | R159 (Save R159) | Free Shipping South Africa",
+  description: "Buy Lumeye Under Eye Serum online. Was R318, Now R159 - Save R159 (50% off)! Clinically proven to reduce puffiness and brighten dark circles in 60 seconds. 4.9/5 stars from 127+ reviews. Dermatologist tested, cruelty-free. Free shipping across South Africa.",
   keywords: "buy under eye serum, eye cream online, depuffing serum South Africa, dark circles treatment, eye care products, skincare online, anti-aging serum, brightening cream, caffeine eye serum, vitamin C eye cream, sale, discount",
   alternates: {
     canonical: '/product',
   },
   openGraph: {
-    title: "Lumeye Under Eye Serum | Buy Online | R299 (Save R300) | Free Shipping South Africa",
-    description: "Buy Lumeye Under Eye Serum online. Was R599, Now R299 - Save R300! Clinically proven to reduce puffiness and brighten dark circles in 60 seconds. 4.9/5 stars from 127+ reviews.",
+    title: "Lumeye Under Eye Serum | Buy Online | R159 (Save R159) | Free Shipping South Africa",
+    description: "Buy Lumeye Under Eye Serum online. Was R318, Now R159 - Save R159 (50% off)! Clinically proven to reduce puffiness and brighten dark circles in 60 seconds. 4.9/5 stars from 127+ reviews.",
     url: 'https://lumeye.co.za/product',
     type: 'website',
     images: [
@@ -31,19 +31,19 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Lumeye Under Eye Serum | Buy Online | R299 (Save R300) | Free Shipping South Africa",
-    description: "Buy Lumeye Under Eye Serum online. Was R599, Now R299 - Save R300! Clinically proven to reduce puffiness and brighten dark circles in 60 seconds. 4.9/5 stars from 127+ reviews.",
+    title: "Lumeye Under Eye Serum | Buy Online | R159 (Save R159) | Free Shipping South Africa",
+    description: "Buy Lumeye Under Eye Serum online. Was R318, Now R159 - Save R159 (50% off)! Clinically proven to reduce puffiness and brighten dark circles in 60 seconds. 4.9/5 stars from 127+ reviews.",
     images: ['/product-twitter-image.jpg'],
   },
   other: {
-    'product:price:amount': '299',
+    'product:price:amount': '159',
     'product:price:currency': 'ZAR',
     'product:availability': 'in stock',
     'product:condition': 'new',
     'product:retailer_item_id': 'lumeye-serum-001',
     'product:brand': 'Lumeye',
     'product:category': 'Beauty & Personal Care > Skincare > Eye Care',
-    'product:original_price:amount': '599',
+    'product:original_price:amount': '318',
     'product:original_price:currency': 'ZAR',
   },
 }
