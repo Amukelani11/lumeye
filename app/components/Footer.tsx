@@ -64,8 +64,7 @@ export default function Footer() {
               />
             </Link>
             <p className="text-gray-300 mb-6 leading-relaxed">
-              Transform tired, puffy eyes in just 60 seconds with our premium under-eye serum. Clinically tested and
-              dermatologist approved.
+              Advanced skincare meets light therapy. Clinically inspired LED innovation designed to smooth, brighten, and rejuvenate your skin — from home.
             </p>
             <div className="flex space-x-4">
               <a

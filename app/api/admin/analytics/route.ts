@@ -6,11 +6,27 @@ export async function GET() {
     // Get current timestamp for "active users" (users active in last 5 minutes)
     const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000)
     
-    // Active users (sessions in last 5 minutes) - using cart activity as proxy
-    const { count: activeUsers } = await supabase
-      .from('carts')
-      .select('*', { count: 'exact', head: true })
-      .gte('updated_at', fiveMinutesAgo.toISOString())
+    // Active users (sessions in last 5 minutes) - using visitor_tracking
+    // Try last_seen_at first
+    const { data: activeByLastSeen } = await supabase
+      .from('visitor_tracking')
+      .select('session_id')
+      .gte('last_seen_at', fiveMinutesAgo.toISOString())
+      .limit(1000)
+    
+    // Fallback to created_at if no results
+    let activeVisitorSessions = activeByLastSeen
+    if (!activeByLastSeen || activeByLastSeen.length === 0) {
+      const { data: activeByCreated } = await supabase
+        .from('visitor_tracking')
+        .select('session_id')
+        .gte('created_at', fiveMinutesAgo.toISOString())
+        .limit(1000)
+      activeVisitorSessions = activeByCreated
+    }
+    
+    const uniqueActiveSessions = new Set(activeVisitorSessions?.map(v => v.session_id) || [])
+    const activeUsers = uniqueActiveSessions.size
 
     // Cart abandonment (carts created in last 24 hours but not purchased)
     const { count: cartAbandonment } = await supabase

@@ -19,10 +19,10 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: "Lumeye - Premium Under Eye Serum | Depuff & Brighten in 60 Seconds",
+  title: "Lumeye | Advanced Skincare Meets Light Therapy | LED Skincare Devices South Africa",
   description:
-    "Transform tired eyes instantly with Lumeye Under Eye Serum. Clinically proven to reduce puffiness and brighten dark circles in just 60 seconds. Dermatologist tested, cruelty-free, and suitable for sensitive skin. Free shipping in South Africa.",
-  keywords: "under eye serum, eye cream, depuffing serum, dark circles, eye care, skincare, anti-aging, brightening serum, South Africa, dermatologist tested, cruelty-free, sensitive skin, caffeine serum, vitamin C serum, hyaluronic acid",
+    "Advanced skincare meets light therapy. Lumeye Glow Wand and Glow Gel deliver clinical-grade LED innovation designed to smooth, brighten, and rejuvenate your skin — from home. 4.9/5 stars from 127+ reviews. Free shipping in South Africa.",
+  keywords: "LED light therapy, red light therapy device, skincare device, LED wand, at-home facial, collagen production, skin rejuvenation, anti-aging device, South Africa, skincare technology, LED therapy wand",
   authors: [{ name: "Lumeye" }],
   creator: "Lumeye",
   publisher: "Lumeye",
@@ -40,21 +40,21 @@ export const metadata: Metadata = {
     locale: 'en_ZA',
     url: 'https://lumeye.co.za',
     siteName: 'Lumeye',
-    title: 'Lumeye - Premium Under Eye Serum | Depuff & Brighten in 60 Seconds',
-    description: 'Transform tired eyes instantly with Lumeye Under Eye Serum. Clinically proven to reduce puffiness and brighten dark circles in just 60 seconds.',
+    title: 'Lumeye | Advanced Skincare Meets Light Therapy | LED Skincare Devices South Africa',
+    description: 'Advanced skincare meets light therapy. Lumeye Glow Wand and Glow Gel deliver clinical-grade LED innovation designed to smooth, brighten, and rejuvenate your skin — from home.',
     images: [
       {
-        url: '/og-image.jpg',
+        url: '/homepage-og-image.jpg',
         width: 1200,
         height: 630,
-        alt: 'Lumeye Under Eye Serum - Transform tired eyes in 60 seconds',
+        alt: 'Lumeye Glow Wand - Advanced LED Light Therapy Device',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Lumeye - Premium Under Eye Serum | Depuff & Brighten in 60 Seconds',
-    description: 'Transform tired eyes instantly with Lumeye Under Eye Serum. Clinically proven to reduce puffiness and brighten dark circles in just 60 seconds.',
+    title: 'Lumeye | Advanced Skincare Meets Light Therapy | LED Skincare Devices South Africa',
+    description: 'Advanced skincare meets light therapy. Lumeye Glow Wand and Glow Gel deliver clinical-grade LED innovation designed to smooth, brighten, and rejuvenate your skin — from home.',
     images: ['/twitter-image.jpg'],
     creator: '@lumeye',
   },

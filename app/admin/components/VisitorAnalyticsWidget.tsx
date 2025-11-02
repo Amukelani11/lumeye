@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Users, Eye, TrendingUp, Clock, Monitor, Smartphone, Tablet, Globe, Activity, Target } from "lucide-react"
+import { Users, Eye, TrendingUp, Clock, Activity, Target } from "lucide-react"
 
 interface VisitorData {
   activeVisitors: number
@@ -11,13 +11,6 @@ interface VisitorData {
   averageSessionTime: number
   topPages: Array<{ page: string; views: number }>
   recentActivity: Array<{ time: string; action: string; page: string; sessionId?: string; metadata?: any }>
-  deviceBreakdown: {
-    desktop: number
-    mobile: number
-    tablet: number
-    other: number
-  }
-  estimatedCountries: number
   bounceRate: number
   conversionRate: number
 }
@@ -30,8 +23,6 @@ export default function VisitorAnalyticsWidget() {
     averageSessionTime: 0,
     topPages: [],
     recentActivity: [],
-    deviceBreakdown: { desktop: 0, mobile: 0, tablet: 0, other: 0 },
-    estimatedCountries: 0,
     bounceRate: 0,
     conversionRate: 0
   })
@@ -98,6 +89,7 @@ export default function VisitorAnalyticsWidget() {
               <span className="text-2xl font-bold text-blue-600">{visitorData.activeVisitors}</span>
             </div>
             <p className="text-sm text-gray-600">Active Visitors</p>
+            <p className="text-xs text-gray-500 mt-1">Last 5 minutes</p>
           </div>
 
           <div className="text-center p-4 bg-green-50 rounded-lg">
@@ -106,6 +98,7 @@ export default function VisitorAnalyticsWidget() {
               <span className="text-2xl font-bold text-green-600">{visitorData.totalViews}</span>
             </div>
             <p className="text-sm text-gray-600">Total Views</p>
+            <p className="text-xs text-gray-500 mt-1">Last 24 hours</p>
           </div>
 
           <div className="text-center p-4 bg-purple-50 rounded-lg">
@@ -114,6 +107,7 @@ export default function VisitorAnalyticsWidget() {
               <span className="text-2xl font-bold text-purple-600">{visitorData.productViews}</span>
             </div>
             <p className="text-sm text-gray-600">Product Views</p>
+            <p className="text-xs text-gray-500 mt-1">Last 24 hours</p>
           </div>
 
           <div className="text-center p-4 bg-orange-50 rounded-lg">
@@ -122,11 +116,12 @@ export default function VisitorAnalyticsWidget() {
               <span className="text-2xl font-bold text-orange-600">{visitorData.averageSessionTime}m</span>
             </div>
             <p className="text-sm text-gray-600">Avg Session</p>
+            <p className="text-xs text-gray-500 mt-1">Last 24 hours</p>
           </div>
         </div>
 
         {/* Additional Metrics */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 gap-4">
           <div className="text-center p-4 bg-indigo-50 rounded-lg">
             <div className="flex items-center justify-center gap-2 mb-2">
               <Activity className="h-5 w-5 text-indigo-600" />
@@ -141,22 +136,6 @@ export default function VisitorAnalyticsWidget() {
               <span className="text-2xl font-bold text-pink-600">{visitorData.conversionRate}%</span>
             </div>
             <p className="text-sm text-gray-600">Conversion Rate</p>
-          </div>
-
-          <div className="text-center p-4 bg-cyan-50 rounded-lg">
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <Globe className="h-5 w-5 text-cyan-600" />
-              <span className="text-2xl font-bold text-cyan-600">{visitorData.estimatedCountries}</span>
-            </div>
-            <p className="text-sm text-gray-600">Countries</p>
-          </div>
-
-          <div className="text-center p-4 bg-gray-50 rounded-lg">
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <Monitor className="h-5 w-5 text-gray-600" />
-              <span className="text-2xl font-bold text-gray-600">{visitorData.deviceBreakdown.desktop}</span>
-            </div>
-            <p className="text-sm text-gray-600">Desktop</p>
           </div>
         </div>
 
@@ -177,15 +156,27 @@ export default function VisitorAnalyticsWidget() {
         <div>
           <h4 className="font-semibold mb-3">Recent Activity</h4>
           <div className="space-y-2 max-h-32 overflow-y-auto">
-            {visitorData.recentActivity.map((activity, index) => (
-              <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded text-sm">
-                <div>
-                  <span className="font-medium">{activity.action}</span>
-                  <span className="text-gray-600 ml-2">on {activity.page}</span>
-                </div>
-                <span className="text-gray-500">{activity.time}</span>
-              </div>
-            ))}
+            {visitorData.recentActivity.length > 0 ? (
+              visitorData.recentActivity.map((activity, index) => {
+                const timeAgo = activity.time 
+                  ? new Date(activity.time).toLocaleTimeString('en-US', { 
+                      hour: '2-digit', 
+                      minute: '2-digit' 
+                    })
+                  : 'Just now'
+                return (
+                  <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded text-sm">
+                    <div>
+                      <span className="font-medium capitalize">{activity.action || 'view'}</span>
+                      <span className="text-gray-600 ml-2">on {activity.page}</span>
+                    </div>
+                    <span className="text-gray-500 text-xs">{timeAgo}</span>
+                  </div>
+                )
+              })
+            ) : (
+              <p className="text-sm text-gray-500 text-center py-2">No recent activity</p>
+            )}
           </div>
         </div>
       </CardContent>

@@ -81,9 +81,49 @@ function cartReducer(state: CartState, action: CartAction): CartState {
 }
 
 function calculateTotals(state: Omit<CartState, "total" | "itemCount">): CartState {
-  const total = state.items.reduce((sum, item) => sum + item.price * item.quantity, 0)
-  const itemCount = state.items.reduce((sum, item) => sum + item.quantity, 0)
-  return { ...state, total, itemCount }
+  // Check if both wand and gel are in the cart
+  const wandItem = state.items.find(item => item.id === "lumeye-glow-wand")
+  const gelItem = state.items.find(item => item.id === "lumeye-glow-gel")
+  const bundleItem = state.items.find(item => item.id === "lumeye-glow-kit")
+  
+  let processedItems = [...state.items]
+  
+  // If both wand and gel are present, automatically convert to bundle(s)
+  if (wandItem && gelItem && !bundleItem) {
+    const minQuantity = Math.min(wandItem.quantity, gelItem.quantity)
+    
+    if (minQuantity > 0) {
+      // Remove used wand and gel items
+      processedItems = processedItems.filter(item => item.id !== "lumeye-glow-wand" && item.id !== "lumeye-glow-gel")
+      
+      // Add bundle with the combined quantity
+      processedItems.push({
+        id: "lumeye-glow-kit",
+        name: "Lumeye Glow Kit",
+        price: 849,
+        quantity: minQuantity,
+        image: "/lumeyebundleimage.png"
+      })
+      
+      // Add remaining wand/gel quantities if any
+      if (wandItem.quantity > minQuantity) {
+        processedItems.push({
+          ...wandItem,
+          quantity: wandItem.quantity - minQuantity
+        })
+      }
+      if (gelItem.quantity > minQuantity) {
+        processedItems.push({
+          ...gelItem,
+          quantity: gelItem.quantity - minQuantity
+        })
+      }
+    }
+  }
+  
+  const total = processedItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
+  const itemCount = processedItems.reduce((sum, item) => sum + item.quantity, 0)
+  return { ...state, items: processedItems, total, itemCount }
 }
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
@@ -99,9 +139,27 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     if (savedCart) {
       try {
         const cartItems = JSON.parse(savedCart)
-        dispatch({ type: "LOAD_CART", payload: cartItems })
+
+        // Check if any items have old product IDs and update them
+        const updatedItems = cartItems.map((item: CartItem) => {
+          // Update old product references
+          if (item.id === "lumeye-serum" || item.id === "lumeye-under-eye-serum") {
+            return { ...item, id: "lumeye-glow-wand", price: 799, name: "Lumeye Glow Wand", image: "/lumeyewandhero.png" }
+          }
+          return item
+        })
+
+        // If items were updated, save back to localStorage and dispatch
+        if (JSON.stringify(cartItems) !== JSON.stringify(updatedItems)) {
+          localStorage.setItem("lumeye-cart", JSON.stringify(updatedItems))
+          dispatch({ type: "LOAD_CART", payload: updatedItems })
+        } else {
+          dispatch({ type: "LOAD_CART", payload: cartItems })
+        }
       } catch (error) {
         console.error("Failed to load cart from localStorage:", error)
+        // Clear corrupted cart data
+        localStorage.removeItem("lumeye-cart")
       }
     }
   }, [])
@@ -109,7 +167,33 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   // Save cart to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem("lumeye-cart", JSON.stringify(state.items))
-  }, [state.items])
+    
+    // Track cart abandonment when items are in cart
+    if (state.items.length > 0) {
+      const sessionId = localStorage.getItem('cart_session_id') || `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      localStorage.setItem('cart_session_id', sessionId)
+      
+      // Debounce cart abandonment tracking
+      const timeoutId = setTimeout(() => {
+        fetch('/api/track-cart-abandonment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sessionId,
+            cartItems: state.items.map(item => ({
+              product_name: item.name,
+              quantity: item.quantity,
+              unit_price: item.price,
+              product_image: item.image
+            })),
+            totalValue: state.total
+          })
+        }).catch(err => console.error('Cart abandonment tracking error:', err))
+      }, 5000) // Track after 5 seconds of inactivity
+      
+      return () => clearTimeout(timeoutId)
+    }
+  }, [state.items, state.total])
 
   return <CartContext.Provider value={{ state, dispatch }}>{children}</CartContext.Provider>
 }

@@ -1,5 +1,12 @@
+import type { Metadata } from "next"
 import Footer from "../components/Footer"
 import { Truck, Clock, MapPin, Package } from "lucide-react"
+
+export const metadata: Metadata = {
+  title: "Shipping Information | Free Shipping South Africa | Lumeye",
+  description: "Fast, reliable shipping across South Africa. Free shipping on all Lumeye LED light therapy orders. Standard and express delivery options available.",
+  keywords: "Lumeye shipping, free shipping South Africa, delivery times, shipping options, express delivery",
+}
 
 export default function ShippingPage() {
   return (

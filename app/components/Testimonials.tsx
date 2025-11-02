@@ -9,7 +9,7 @@ const testimonialsWithImages = [
     location: "Johannesburg",
     age: "29",
     rating: 5,
-    text: "I don't even need concealer anymore! This serum has completely transformed my under-eye area. I use it every morning and my colleagues keep asking if I've been on vacation.",
+    text: "After two weeks, my skin felt smoother and more radiant. It's like a facial, every morning.",
     initials: "LM",
     timeUsed: "3 months",
     verified: true,
@@ -82,10 +82,10 @@ export default function Testimonials() {
           </span>
         </div>
         <h2 className="font-dm-sans text-4xl lg:text-5xl font-bold text-gray-900 mb-6 leading-tight">
-          Real <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-600 to-pink-600">Results</span> from Real People
+          Loved by <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-600 to-pink-600">Our Community</span>
         </h2>
         <p className="text-xl text-gray-700 mb-12 max-w-3xl mx-auto leading-relaxed">
-          Join over 2,800 happy customers who've discovered the secret to brighter, more awake-looking eyes
+          Join thousands of customers who've transformed their skin with Lumeye LED therapy
         </p>
         
         {/* Trust Stats */}

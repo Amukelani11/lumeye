@@ -3,153 +3,163 @@ import { supabase } from "@/lib/database"
 
 export async function GET() {
   try {
-    // Get current timestamp for "active users" (users active in last 5 minutes)
-    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000)
-    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000)
-    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000)
-
-    // Active visitors (unique sessions in last 5 minutes)
-    const { data: activeSessions } = await supabase
+    // Get current timestamp for "active visitors" (visitors active in last 5 minutes)
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString()
+    
+    // Active visitors (sessions active in last 5 minutes) - use last_seen_at
+    const { data: activeVisitorSessions } = await supabase
       .from('visitor_tracking')
-      .select('session_id, created_at, metadata')
-      .gte('created_at', fiveMinutesAgo.toISOString())
-      .order('created_at', { ascending: false })
+      .select('session_id')
+      .gte('last_seen_at', fiveMinutesAgo)
+      
+    const uniqueActiveSessions = new Set(activeVisitorSessions?.map(v => v.session_id) || [])
+    const activeVisitors = uniqueActiveSessions.size
 
-    const activeVisitors = activeSessions ? new Set(activeSessions.map(s => s.session_id)).size : 0
+    // If last_seen_at doesn't work, try created_at as fallback
+    let activeVisitorsFallback = activeVisitors
+    if (activeVisitors === 0) {
+      const { data: recentSessions } = await supabase
+        .from('visitor_tracking')
+        .select('session_id')
+        .gte('created_at', fiveMinutesAgo)
+      const uniqueRecent = new Set(recentSessions?.map(v => v.session_id) || [])
+      activeVisitorsFallback = uniqueRecent.size
+    }
 
-    // Total views (all page views in last 24 hours)
+    // Total views in last 24 hours
+    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
     const { count: totalViews } = await supabase
       .from('visitor_tracking')
       .select('*', { count: 'exact', head: true })
-      .gte('created_at', oneDayAgo.toISOString())
+      .gte('created_at', oneDayAgo)
 
-    // Product views (page views on product page in last 24 hours)
+    // Product views (pages containing 'product')
     const { count: productViews } = await supabase
       .from('visitor_tracking')
       .select('*', { count: 'exact', head: true })
-      .eq('page', '/product')
-      .gte('created_at', oneDayAgo.toISOString())
+      .gte('created_at', oneDayAgo)
+      .like('page', '%product%')
 
-    // Calculate average session time (using visitor tracking data)
-    const { data: sessionData } = await supabase
+    // Top pages (last 24 hours)
+    const { data: pageViews } = await supabase
       .from('visitor_tracking')
-      .select('session_id, created_at')
-      .gte('created_at', oneHourAgo.toISOString())
-      .order('created_at', { ascending: true })
+      .select('page, created_at')
+      .gte('created_at', oneDayAgo)
+      .order('created_at', { ascending: false })
+      .limit(1000)
 
-    let averageSessionTime = 0
-    if (sessionData && sessionData.length > 0) {
-      // Group by session and calculate duration
-      const sessionDurations = new Map()
-      sessionData.forEach(record => {
-        const sessionId = record.session_id
-        if (!sessionDurations.has(sessionId)) {
-          sessionDurations.set(sessionId, {
-            start: new Date(record.created_at),
-            end: new Date(record.created_at)
-          })
-        } else {
-          const session = sessionDurations.get(sessionId)
-          session.end = new Date(record.created_at)
-        }
-      })
-
-      const totalTime = Array.from(sessionDurations.values()).reduce((sum, session) => {
-        return sum + (session.end.getTime() - session.start.getTime())
-      }, 0)
-
-      averageSessionTime = Math.round(totalTime / sessionDurations.size / 1000 / 60) // Convert to minutes
-    }
-
-    // Top pages (actual page views from tracking data)
-    const { data: pageViewsData } = await supabase
-      .from('visitor_tracking')
-      .select('page')
-      .gte('created_at', oneDayAgo.toISOString())
-
-    const pageViewsCount = new Map()
-    pageViewsData?.forEach(record => {
-      const page = record.page
-      pageViewsCount.set(page, (pageViewsCount.get(page) || 0) + 1)
+    // Calculate top pages
+    const pageCounts: { [key: string]: number } = {}
+    pageViews?.forEach(view => {
+      const page = view.page || 'unknown'
+      pageCounts[page] = (pageCounts[page] || 0) + 1
     })
 
-    const topPages = Array.from(pageViewsCount.entries())
+    const topPages = Object.entries(pageCounts)
       .map(([page, views]) => ({ page, views }))
       .sort((a, b) => b.views - a.views)
-      .slice(0, 5)
+      .slice(0, 10)
 
-    // Recent activity (actual visitor actions with enhanced data)
+    // Recent activity (last 50 actions)
     const { data: recentActivity } = await supabase
       .from('visitor_tracking')
-      .select('created_at, action, page, session_id, metadata')
-      .gte('created_at', oneHourAgo.toISOString())
+      .select('session_id, page, action, created_at, metadata')
       .order('created_at', { ascending: false })
-      .limit(15)
+      .limit(50)
 
-    const formattedRecentActivity = recentActivity?.map(activity => ({
-      time: new Date(activity.created_at).toLocaleTimeString(),
-      action: activity.action === 'page_view' ? 'Page viewed' : activity.action,
-      page: activity.page,
+    const formattedActivity = recentActivity?.map(activity => ({
+      time: activity.created_at,
+      action: activity.action || 'view',
+      page: activity.page || 'unknown',
       sessionId: activity.session_id,
-      metadata: activity.metadata ? JSON.parse(activity.metadata) : null
+      metadata: activity.metadata
     })) || []
 
-    // Device breakdown (from user agents in last hour)
-    const { data: deviceData } = await supabase
+    // Device breakdown removed - not needed
+
+    // Calculate average session time using last_seen_at
+    const { data: sessionData } = await supabase
       .from('visitor_tracking')
-      .select('user_agent')
-      .gte('created_at', oneHourAgo.toISOString())
-      .not('user_agent', 'is', null)
+      .select('session_id, created_at, last_seen_at')
+      .gte('created_at', oneDayAgo)
 
-    const deviceBreakdown = {
-      desktop: 0,
-      mobile: 0,
-      tablet: 0,
-      other: 0
-    }
-
-    deviceData?.forEach(record => {
-      const ua = record.user_agent.toLowerCase()
-      if (ua.includes('mobile') || ua.includes('android') || ua.includes('iphone')) {
-        deviceBreakdown.mobile++
-      } else if (ua.includes('tablet') || ua.includes('ipad')) {
-        deviceBreakdown.tablet++
-      } else if (ua.includes('windows') || ua.includes('mac') || ua.includes('linux')) {
-        deviceBreakdown.desktop++
+    const sessionTimes: { [key: string]: { first: Date, last: Date } } = {}
+    sessionData?.forEach(activity => {
+      const sessionId = activity.session_id
+      const firstTimestamp = new Date(activity.created_at)
+      const lastTimestamp = activity.last_seen_at ? new Date(activity.last_seen_at) : new Date(activity.created_at)
+      
+      if (!sessionTimes[sessionId]) {
+        sessionTimes[sessionId] = { first: firstTimestamp, last: lastTimestamp }
       } else {
-        deviceBreakdown.other++
+        if (firstTimestamp < sessionTimes[sessionId].first) {
+          sessionTimes[sessionId].first = firstTimestamp
+        }
+        if (lastTimestamp > sessionTimes[sessionId].last) {
+          sessionTimes[sessionId].last = lastTimestamp
+        }
       }
     })
 
-    // Geographic data (from IP addresses - basic estimation)
-    const { data: geoData } = await supabase
-      .from('visitor_tracking')
-      .select('ip_address')
-      .gte('created_at', oneDayAgo.toISOString())
-      .not('ip_address', 'eq', 'unknown')
+    const sessionDurations = Object.values(sessionTimes).map(session => 
+      (session.last.getTime() - session.first.getTime()) / 60000 // in minutes
+    )
 
-    const uniqueIPs = new Set(geoData?.map(d => d.ip_address) || [])
-    const estimatedCountries = uniqueIPs.size * 0.7 // Rough estimate: 70% of unique IPs are from different countries
+    const averageSessionTime = sessionDurations.length > 0
+      ? Math.round(sessionDurations.reduce((a, b) => a + b, 0) / sessionDurations.length)
+      : 0
+
+    // Get unique sessions for bounce rate calculation
+    const { data: uniqueSessions } = await supabase
+      .from('visitor_tracking')
+      .select('session_id')
+      .gte('created_at', oneDayAgo)
+
+    const uniqueSessionIds = new Set(uniqueSessions?.map(v => v.session_id) || [])
+    const totalSessions = uniqueSessionIds.size
+
+    // Bounce rate (sessions with only 1 page view)
+    const { data: singlePageSessions } = await supabase
+      .from('visitor_tracking')
+      .select('session_id')
+      .gte('created_at', oneDayAgo)
+
+    const sessionPageCounts: { [key: string]: number } = {}
+    singlePageSessions?.forEach(session => {
+      const sessionId = session.session_id
+      sessionPageCounts[sessionId] = (sessionPageCounts[sessionId] || 0) + 1
+    })
+
+    const bouncedSessions = Object.values(sessionPageCounts).filter(count => count === 1).length
+    const bounceRate = totalSessions > 0 ? Math.round((bouncedSessions / totalSessions) * 100) : 0
+
+    // Conversion rate (simplified - sessions that reached checkout)
+    const { count: checkoutSessions } = await supabase
+      .from('visitor_tracking')
+      .select('session_id', { count: 'exact', head: true })
+      .gte('created_at', oneDayAgo)
+      .like('page', '%checkout%')
+
+    const conversionRate = totalSessions > 0 
+      ? Math.round((checkoutSessions || 0) / totalSessions * 100) 
+      : 0
 
     return NextResponse.json({
-      activeVisitors,
+      activeVisitors: activeVisitors > 0 ? activeVisitors : activeVisitorsFallback,
       totalViews: totalViews || 0,
       productViews: productViews || 0,
-      averageSessionTime: averageSessionTime || 0,
+      averageSessionTime,
       topPages,
-      recentActivity: formattedRecentActivity,
-      deviceBreakdown,
-      estimatedCountries: Math.round(estimatedCountries),
-      // Additional real-time metrics
-      bounceRate: totalViews && totalViews > 0 ? Math.round((activeVisitors / totalViews) * 100) || 0 : 0,
-      conversionRate: totalViews && productViews && totalViews > 0 ? Math.round((productViews / totalViews) * 100) || 0 : 0
+      recentActivity: formattedActivity,
+      bounceRate,
+      conversionRate
     })
 
   } catch (error) {
-    console.error('Error fetching visitor analytics:', error)
+    console.error('Visitor Analytics API Error:', error)
     return NextResponse.json(
       { error: 'Failed to fetch visitor analytics' },
       { status: 500 }
     )
   }
-} 
+}

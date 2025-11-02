@@ -167,7 +167,7 @@ export class EmailService {
               ${data.items.map(item => `
                 <div class="item">
                   <span>${item.name} (Qty: ${item.quantity})</span>
-                  <span>R${item.price.toFixed(2)}</span>
+                  <span>R${(item.price * item.quantity).toFixed(2)}</span>
                 </div>
               `).join('')}
               
@@ -363,7 +363,7 @@ export class EmailService {
               
               <a href="https://lumeye.co.za" class="button">Shop Now</a>
               
-              <p>Transform tired eyes in just 60 seconds with our premium under-eye serum!</p>
+              <p>Transform your skincare routine with clinical-grade LED light therapy technology!</p>
             </div>
             
             <div class="footer">
@@ -471,7 +471,7 @@ export class EmailService {
               
               <a href="https://lumeye.co.za/product" class="button">Shop Now</a>
               
-              <p>Transform tired eyes in just 60 seconds with our premium under-eye serum!</p>
+              <p>Transform your skincare routine with clinical-grade LED light therapy technology!</p>
             </div>
             
             <div class="footer">
@@ -530,7 +530,7 @@ export class EmailService {
               ${data.items.map(item => `
                 <div class="item">
                   <span>${item.name} (Qty: ${item.quantity})</span>
-                  <span>R${item.price.toFixed(2)}</span>
+                  <span>R${(item.price * item.quantity).toFixed(2)}</span>
                 </div>
               `).join('')}
             </div>
@@ -598,7 +598,7 @@ export class EmailService {
           </div>
           
           <div class="content">
-            <p>We noticed you left some amazing products in your cart! Don't let them get away - complete your purchase and start your journey to brighter, more beautiful eyes.</p>
+            <p>We noticed you left some amazing products in your cart! Don't let them get away - complete your purchase and start your journey to brighter, more radiant skin with clinical-grade LED light therapy.</p>
             
             <div class="cart-items">
               <h3>Your Cart Items:</h3>
@@ -609,7 +609,7 @@ export class EmailService {
                     <div><strong>${item.name}</strong></div>
                     <div>Quantity: ${item.quantity}</div>
                   </div>
-                  <div class="item-price">R${item.price.toFixed(2)}</div>
+                  <div class="item-price">R${(item.price * item.quantity).toFixed(2)}</div>
                 </div>
               `).join('')}
               <div class="total">
@@ -674,7 +674,7 @@ export class EmailService {
           </div>
           
           <div class="content">
-            <p>You're so close to getting your amazing Lumeye products! We noticed you started the checkout process but didn't complete it. Don't let these products slip away!</p>
+            <p>You're so close to getting your amazing Lumeye products! We noticed you started the checkout process but didn't complete it. Don't let these advanced LED light therapy devices slip away!</p>
             
             <div class="checkout-items">
               <h3>Your Order Summary:</h3>
@@ -685,7 +685,7 @@ export class EmailService {
                     <div><strong>${item.name}</strong></div>
                     <div>Quantity: ${item.quantity}</div>
                   </div>
-                  <div class="item-price">R${item.price.toFixed(2)}</div>
+                  <div class="item-price">R${(item.price * item.quantity).toFixed(2)}</div>
                 </div>
               `).join('')}
               <div class="total">

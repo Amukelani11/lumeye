@@ -59,15 +59,15 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    // Create order
+    // Create order - status is 'confirmed' only after payment verification
     const { data: order, error: orderError } = await supabase
       .from('orders')
       .insert({
         order_number: orderNumber,
         email,
         phone,
-        status: 'confirmed',
-        payment_status: 'completed',
+        status: 'confirmed', // Only created after payment verification
+        payment_status: 'completed', // Only created after payment verification
         shipping_status: 'pending',
         subtotal,
         shipping_cost: shippingCost,
@@ -86,19 +86,39 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to create order' }, { status: 500 })
     }
 
-    // Create order items
-    const orderItems = items.map((item: any) => ({
-      order_id: order.id,
-      product_id: null, // Set to null since we don't have proper UUIDs in guest checkout
-      quantity: item.quantity,
-      unit_price: item.unit_price,
-      total_price: item.unit_price * item.quantity,
-      product_snapshot: {
-        name: item.name || 'Lumeye Under Eye Serum',
-        price: item.unit_price,
-        images: item.images || []
+    // Look up product IDs from slugs
+    const productSlugs = items.map((item: any) => item.product_id || item.id).filter(Boolean)
+    const { data: productsData } = await supabase
+      .from('products')
+      .select('id, slug, name, price')
+      .in('slug', productSlugs)
+
+    // Create a map of slug to product ID
+    const productMap = new Map<string, string>()
+    if (productsData) {
+      productsData.forEach((product: any) => {
+        productMap.set(product.slug, product.id)
+      })
+    }
+
+    // Create order items with proper product IDs
+    const orderItems = items.map((item: any) => {
+      const productSlug = item.product_id || item.id
+      const productId = productMap.get(productSlug) || null
+      
+      return {
+        order_id: order.id,
+        product_id: productId,
+        quantity: item.quantity,
+        unit_price: item.unit_price,
+        total_price: item.unit_price * item.quantity,
+        product_snapshot: {
+          name: item.name || 'Lumeye Product',
+          price: item.unit_price,
+          images: item.images || []
+        }
       }
-    }))
+    })
 
     const { error: itemsError } = await supabase
       .from('order_items')
@@ -160,7 +180,7 @@ export async function POST(request: NextRequest) {
         totalAmount: order.total_amount,
         trackingNumber: trackingNumber,
         items: items.map((item: any) => ({
-          name: item.name || 'Lumeye Under Eye Serum',
+          name: item.name || 'Lumeye Product',
           quantity: item.quantity,
           price: item.unit_price
         })),

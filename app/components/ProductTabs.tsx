@@ -10,20 +10,17 @@ const tabs = [
     content: (
       <div className="prose max-w-none">
         <p className="text-gray-700 leading-relaxed mb-4">
-          Lumeye Under Eye Serum is a revolutionary skincare solution designed specifically for the delicate under-eye
-          area. Our fast-acting formula works in just 60 seconds to visibly reduce puffiness, brighten dark circles, and
-          restore a youthful glow to tired eyes.
+          Lumeye Glow Wand is a precision-engineered LED device that delivers professional-grade red light therapy in the comfort of your home. Using clinically tested 660nm wavelengths, it penetrates deep into your skin to stimulate collagen production and cellular renewal.
         </p>
         <p className="text-gray-700 leading-relaxed mb-4">
-          Crafted with premium, clinically-tested ingredients, this serum is gentle enough for sensitive skin while
-          delivering powerful results. The lightweight, non-greasy formula absorbs quickly and can be worn under makeup.
+          Designed for daily use, the Lumeye Glow Wand is safe, non-invasive, and requires just 5 minutes of treatment time. Combined with the Lumeye Glow Gel, you'll experience visible improvements in skin tone, firmness, and clarity within weeks.
         </p>
         <ul className="list-disc list-inside text-gray-700 space-y-2">
-          <li>Reduces puffiness in 60 seconds</li>
-          <li>Brightens dark circles</li>
-          <li>Suitable for all skin types</li>
-          <li>Non-irritating and fragrance-free</li>
-          <li>Sustainable refillable packaging</li>
+          <li>Reduces fine lines and early wrinkles</li>
+          <li>Brightens tired or uneven skin</li>
+          <li>Promotes elasticity and firmness</li>
+          <li>Depuffs under-eyes and contours facial features</li>
+          <li>Safe for daily use with no downtime</li>
         </ul>
       </div>
     ),
@@ -33,29 +30,31 @@ const tabs = [
     label: "Ingredients",
     content: (
       <div className="space-y-4">
-        <h3 className="font-dm-sans text-lg font-semibold text-gray-900">Key Ingredients:</h3>
+        <h3 className="font-dm-sans text-lg font-semibold text-gray-900 mb-4">Product Specifications:</h3>
         <div className="space-y-3">
           <div>
-            <h4 className="font-medium text-gray-900">Caffeine (2%)</h4>
-            <p className="text-gray-600 text-sm">Reduces puffiness and improves circulation</p>
+            <h4 className="font-medium text-gray-900">LED Wavelength</h4>
+            <p className="text-gray-600 text-sm">660nm red light (clinically proven for skin treatment)</p>
           </div>
           <div>
-            <h4 className="font-medium text-gray-900">Vitamin C</h4>
-            <p className="text-gray-600 text-sm">Brightens and evens skin tone</p>
+            <h4 className="font-medium text-gray-900">Treatment Time</h4>
+            <p className="text-gray-600 text-sm">5 minutes per session, recommended daily</p>
           </div>
           <div>
-            <h4 className="font-medium text-gray-900">Hyaluronic Acid</h4>
-            <p className="text-gray-600 text-sm">Hydrates and plumps the skin</p>
+            <h4 className="font-medium text-gray-900">Battery Life</h4>
+            <p className="text-gray-600 text-sm">Rechargeable via USB-C, 60+ sessions per charge</p>
           </div>
           <div>
-            <h4 className="font-medium text-gray-900">Peptides</h4>
-            <p className="text-gray-600 text-sm">Firms and smooths fine lines</p>
+            <h4 className="font-medium text-gray-900">Safety Features</h4>
+            <p className="text-gray-600 text-sm">No UV rays, no heat, safe for all skin types</p>
           </div>
         </div>
-        <p className="text-sm text-gray-600 mt-4">
-          Full ingredients list: Aqua, Caffeine, Sodium Hyaluronate, Ascorbyl Glucoside, Palmitoyl Tripeptide-1,
-          Glycerin, Phenoxyethanol, Ethylhexylglycerin.
-        </p>
+        <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <h4 className="font-medium text-gray-900 mb-2">Recommended Pairing:</h4>
+          <p className="text-sm text-gray-700">
+            For best results, use with Lumeye Glow Gel. The gel enhances LED conductivity and provides deep hydration with Hyaluronic Acid and Aloe Complex.
+          </p>
+        </div>
       </div>
     ),
   },
@@ -64,19 +63,31 @@ const tabs = [
     label: "How to Use",
     content: (
       <div className="space-y-4">
-        <ol className="list-decimal list-inside space-y-3 text-gray-700">
-          <li>Cleanse your face and pat dry</li>
-          <li>Apply 2-3 pumps of serum under each eye</li>
-          <li>Gently tap with fingertips until fully absorbed</li>
-          <li>Use morning and evening for best results</li>
-          <li>Follow with your regular moisturizer and sunscreen (morning)</li>
+        <ol className="list-decimal list-inside space-y-4 text-gray-700">
+          <li className="mb-2">
+            <strong>Cleanse and dry your skin.</strong>
+            <p className="text-sm text-gray-600 ml-6 mt-1">Remove all makeup and gently pat your face dry with a soft towel.</p>
+          </li>
+          <li className="mb-2">
+            <strong>Apply a thin layer of Lumeye Glow Gel.</strong>
+            <p className="text-sm text-gray-600 ml-6 mt-1">Apply to treatment areas (face, under-eyes, or specific target zones). The gel enhances LED conductivity.</p>
+          </li>
+          <li className="mb-2">
+            <strong>Glide the wand over your skin for 5 minutes.</strong>
+            <p className="text-sm text-gray-600 ml-6 mt-1">Use slow, circular motions. Keep the wand in gentle contact with your skin, moving it continuously to avoid heating any single area.</p>
+          </li>
+          <li className="mb-2">
+            <strong>Follow with your moisturizer.</strong>
+            <p className="text-sm text-gray-600 ml-6 mt-1">Complete your routine with your favorite moisturizer to lock in the benefits.</p>
+          </li>
         </ol>
-        <div className="bg-blush p-4 rounded-lg mt-6">
+        <div className="bg-pink-50 border border-pink-200 rounded-lg p-4 mt-6">
           <h4 className="font-medium text-gray-900 mb-2">Pro Tips:</h4>
           <ul className="text-sm text-gray-700 space-y-1">
-            <li>• Store in the refrigerator for an extra cooling effect</li>
-            <li>• Can be used under makeup</li>
-            <li>• Results are visible immediately and improve with continued use</li>
+            <li>• Use once daily, ideally in the evening as part of your skincare routine</li>
+            <li>• Start with shorter sessions (2-3 minutes) if you have sensitive skin</li>
+            <li>• Results become more visible after consistent use over 2-4 weeks</li>
+            <li>• Keep the device clean by wiping with a soft, damp cloth after each use</li>
           </ul>
         </div>
       </div>

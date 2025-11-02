@@ -11,13 +11,13 @@ export default function CheckoutSummary() {
   const total = subtotal + shipping
 
   return (
-    <div className="bg-cool-grey p-8 rounded-2xl h-fit">
-      <h2 className="font-dm-sans text-xl font-semibold text-gray-900 mb-6">Order Summary</h2>
+    <div className="bg-cool-grey p-4 sm:p-6 lg:p-8 rounded-xl sm:rounded-2xl h-fit sticky top-4 lg:top-8">
+      <h2 className="font-dm-sans text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">Order Summary</h2>
 
-      <div className="space-y-4 mb-6">
+      <div className="space-y-3 sm:space-y-4 mb-4 sm:mb-6">
         {state.items.map((item) => (
-          <div key={item.id} className="flex items-center space-x-4">
-            <div className="w-16 h-16 bg-white rounded-lg overflow-hidden flex-shrink-0">
+          <div key={item.id} className="flex items-center space-x-3 sm:space-x-4">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-white rounded-lg overflow-hidden flex-shrink-0">
               <Image
                 src={item.image || "/placeholder.svg"}
                 alt={item.name}
@@ -27,35 +27,34 @@ export default function CheckoutSummary() {
               />
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="font-medium text-gray-900 text-sm truncate">{item.name}</h3>
-              <p className="text-gray-600 text-sm">Qty: {item.quantity}</p>
+              <h3 className="font-medium text-gray-900 text-xs sm:text-sm truncate">{item.name}</h3>
+              <p className="text-gray-600 text-xs sm:text-sm">Qty: {item.quantity}</p>
             </div>
             <div className="text-right">
-              <p className="font-semibold text-gray-900 text-sm">R{(item.price * item.quantity).toFixed(2)}</p>
+              <p className="font-semibold text-gray-900 text-xs sm:text-sm">R{(item.price * item.quantity).toFixed(2)}</p>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="border-t pt-6 space-y-3">
-        <div className="flex justify-between text-gray-600">
+      <div className="border-t pt-4 sm:pt-6 space-y-2 sm:space-y-3">
+        <div className="flex justify-between text-sm sm:text-base text-gray-600">
           <span>Subtotal</span>
           <span>R{subtotal.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between text-gray-600">
+        <div className="flex justify-between text-sm sm:text-base text-gray-600">
           <span>Shipping</span>
           <span className={shipping === 0 ? "text-green-600 font-medium" : ""}>
             {shipping === 0 ? "Free" : `R${shipping.toFixed(2)}`}
           </span>
         </div>
-        <div className="border-t pt-3 flex justify-between font-semibold text-lg text-gray-900">
+        <div className="border-t pt-2 sm:pt-3 flex justify-between font-semibold text-base sm:text-lg text-gray-900">
           <span>Total</span>
           <span>R{total.toFixed(2)}</span>
         </div>
       </div>
 
-
-      <div className="mt-6 text-center text-sm text-gray-600">
+      <div className="mt-4 sm:mt-6 text-center text-xs sm:text-sm text-gray-600">
         <p>🔒 Your payment information is secure and encrypted</p>
       </div>
     </div>

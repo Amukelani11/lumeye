@@ -27,6 +27,7 @@ export async function POST(request: NextRequest) {
                      'unknown'
 
     // Prepare visitor tracking data
+    const now = new Date().toISOString()
     const visitorData = {
       session_id: finalSessionId,
       page,
@@ -34,48 +35,30 @@ export async function POST(request: NextRequest) {
       user_agent: userAgent || '',
       referrer: referrer || '',
       ip_address: ipAddress,
-      created_at: timestamp || new Date().toISOString(),
+      created_at: timestamp || now,
+      last_seen_at: now, // Set last_seen_at on creation
       // Store metadata as JSON if provided
       ...(metadata && { metadata: JSON.stringify(metadata) })
     }
 
-    // Insert visitor tracking data with retry logic
-    let retryCount = 0
-    const maxRetries = 3
+    // Insert new visitor tracking record for each page view
+    try {
+      const { error: insertError } = await supabase
+        .from('visitor_tracking')
+        .insert(visitorData)
 
-    while (retryCount < maxRetries) {
-      try {
-        const { error } = await supabase
-          .from('visitor_tracking')
-          .insert(visitorData)
-
-        if (!error) {
-          // Successfully inserted
-          break
-        }
-
-        // If it's a unique constraint error, try updating instead
-        if (error.code === '23505') {
-          console.log('Visitor tracking record already exists, skipping duplicate')
-          break
-        }
-
-        console.error(`Visitor tracking attempt ${retryCount + 1} failed:`, error)
-
-        if (retryCount === maxRetries - 1) {
-          throw error
-        }
-
-        // Wait before retrying (exponential backoff)
-        await new Promise(resolve => setTimeout(resolve, Math.pow(2, retryCount) * 1000))
-        retryCount++
-
-      } catch (insertError) {
-        if (retryCount === maxRetries - 1) {
-          throw insertError
-        }
-        retryCount++
+      if (insertError && insertError.code !== '23505') {
+        console.error('Error inserting visitor tracking:', insertError)
       }
+
+      // Also update last_seen_at for all records of this session (for active visitor counting)
+      await supabase
+        .from('visitor_tracking')
+        .update({ last_seen_at: new Date().toISOString() })
+        .eq('session_id', finalSessionId)
+    } catch (error) {
+      console.error('Error tracking visitor:', error)
+      // Don't fail the request if tracking fails
     }
 
     return NextResponse.json({

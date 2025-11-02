@@ -1,5 +1,12 @@
+import type { Metadata } from "next"
 import Footer from "../components/Footer"
 import { RotateCcw, CheckCircle, XCircle, AlertCircle } from "lucide-react"
+
+export const metadata: Metadata = {
+  title: "Returns & Exchanges | 30-Day Money-Back Guarantee | Lumeye",
+  description: "30-day money-back guarantee on all Lumeye LED light therapy devices. Learn about our returns policy, how to return your order, and refund process.",
+  keywords: "Lumeye returns, return policy, money-back guarantee, LED therapy returns, refund policy",
+}
 
 export default function ReturnsPage() {
   return (

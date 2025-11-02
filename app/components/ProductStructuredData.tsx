@@ -2,38 +2,38 @@ export default function ProductStructuredData() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Product",
-    "name": "Lumeye Under Eye Serum",
-    "description": "Transform tired eyes instantly with Lumeye Under Eye Serum. Clinically proven to reduce puffiness and brighten dark circles in just 60 seconds.",
+    "name": "Lumeye Glow Wand",
+    "description": "Advanced skincare meets light therapy. Precision-engineered LED device with 660nm red light technology. Reduces fine lines, brightens skin, and promotes collagen production.",
     "brand": {
       "@type": "Brand",
       "name": "Lumeye"
     },
-    "category": "Beauty & Personal Care > Skincare > Eye Care",
-    "sku": "lumeye-serum-001",
-    "mpn": "LUM001",
+    "category": "Beauty & Personal Care > Skincare > LED Devices",
+    "sku": "lumeye-glow-wand",
+    "mpn": "LUM-GW-001",
     "gtin": "1234567890123",
     "image": [
-      "https://lumeye.co.za/product-image-1.jpg",
-      "https://lumeye.co.za/product-image-2.jpg",
-      "https://lumeye.co.za/product-image-3.jpg"
+      "https://lumeye.co.za/lumeyewandhero.png",
+      "https://lumeye.co.za/lumeyebundleimage.png",
+      "https://lumeye.co.za/lumeyegelhero.png"
     ],
     "offers": {
       "@type": "Offer",
-      "price": "159.00",
+      "price": "799.00",
       "priceCurrency": "ZAR",
       "availability": "https://schema.org/InStock",
       "priceSpecification": {
         "@type": "UnitPriceSpecification",
-        "price": "159.00",
+        "price": "799.00",
         "priceCurrency": "ZAR",
         "referenceQuantity": {
           "@type": "QuantitativeValue",
           "value": 1,
-          "unitCode": "ML"
+          "unitCode": "C62"
         }
       },
-      "highPrice": "318.00",
-      "lowPrice": "159.00",
+      "highPrice": "999.00",
+      "lowPrice": "799.00",
       "priceValidUntil": "2024-12-31",
       "seller": {
         "@type": "Organization",
@@ -88,7 +88,7 @@ export default function ProductStructuredData() {
           "ratingValue": "5",
           "bestRating": "5"
         },
-        "reviewBody": "Amazing results! My under-eyes look so much brighter and the puffiness is completely gone. I use this every morning and it's become my holy grail product."
+        "reviewBody": "Amazing results! My skin looks so much brighter and smoother. I use this device every morning and it's become my holy grail skincare tool. The LED therapy really works!"
       },
       {
         "@type": "Review",
@@ -101,7 +101,7 @@ export default function ProductStructuredData() {
           "ratingValue": "5",
           "bestRating": "5"
         },
-        "reviewBody": "Works instantly and lasts all day. Love this product! The results are immediate and my colleagues keep asking if I've been on vacation."
+        "reviewBody": "Works great! Love this LED device! The results are visible after a few weeks and my skin texture has improved significantly. My colleagues keep asking what I'm doing differently."
       },
       {
         "@type": "Review",
@@ -114,14 +114,14 @@ export default function ProductStructuredData() {
           "ratingValue": "4",
           "bestRating": "5"
         },
-        "reviewBody": "Great for sensitive skin. No irritation at all and I can see a difference in my dark circles. Will definitely repurchase."
+        "reviewBody": "Great for sensitive skin. No irritation at all and I can see a difference in my skin texture and brightness. Will definitely continue using."
       }
     ],
     "additionalProperty": [
       {
         "@type": "PropertyValue",
-        "name": "Volume",
-        "value": "30ml"
+        "name": "Wavelength",
+        "value": "660nm red light"
       },
       {
         "@type": "PropertyValue",
@@ -130,13 +130,13 @@ export default function ProductStructuredData() {
       },
       {
         "@type": "PropertyValue",
-        "name": "Results",
-        "value": "Visible in 60 seconds"
+        "name": "Treatment Time",
+        "value": "5 minutes daily"
       },
       {
         "@type": "PropertyValue",
-        "name": "Cruelty-free",
-        "value": "Yes"
+        "name": "Power Source",
+        "value": "USB-C rechargeable"
       },
       {
         "@type": "PropertyValue",
@@ -146,17 +146,17 @@ export default function ProductStructuredData() {
       {
         "@type": "PropertyValue",
         "name": "Original Price",
-        "value": "R599"
+        "value": "R999"
       },
       {
         "@type": "PropertyValue",
         "name": "Sale Price",
-        "value": "R159"
+        "value": "R799"
       },
       {
         "@type": "PropertyValue",
         "name": "Savings",
-        "value": "R159 (50% off)"
+        "value": "R200 (20% off)"
       }
     ]
   }

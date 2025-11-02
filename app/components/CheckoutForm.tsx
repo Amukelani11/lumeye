@@ -1,8 +1,8 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
-import { Shield, Truck, RotateCcw, CreditCard, Lock, ExternalLink } from "lucide-react"
+import { useState, useEffect } from "react"
+import { Shield, Truck, RotateCcw, ExternalLink } from "lucide-react"
 import { useCart } from "../lib/cart-context"
 
 interface FormData {
@@ -32,6 +32,38 @@ export default function CheckoutForm() {
     phone: "",
   })
   const [errors, setErrors] = useState<FormErrors>({})
+
+  // Track checkout abandonment when user is on checkout page
+  useEffect(() => {
+    if (state.items.length > 0) {
+      const sessionId = localStorage.getItem('cart_session_id') || `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      localStorage.setItem('cart_session_id', sessionId)
+      
+      // Track checkout abandonment after 10 seconds (user started checkout but didn't complete)
+      const timeoutId = setTimeout(() => {
+        if (formData.email && formData.email.includes('@')) {
+          fetch('/api/track-checkout-abandonment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              sessionId,
+              email: formData.email,
+              checkoutItems: state.items.map(item => ({
+                product_name: item.name,
+                quantity: item.quantity,
+                unit_price: item.price,
+                product_image: item.image
+              })),
+              totalValue: state.total,
+              formData: formData
+            })
+          }).catch(err => console.error('Checkout abandonment tracking error:', err))
+        }
+      }, 10000)
+      
+      return () => clearTimeout(timeoutId)
+    }
+  }, [formData.email, state.items, state.total])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -95,55 +127,7 @@ export default function CheckoutForm() {
     return Object.keys(newErrors).length === 0
   }
 
-  const createOrder = async (checkoutId: string, paymentAmount: number) => {
-    try {
-      const shippingAddress = {
-        first_name: formData.firstName,
-        last_name: formData.lastName,
-        address_line_1: formData.address,
-        city: formData.city,
-        postal_code: formData.postalCode,
-        country: 'ZA'
-      }
-
-      const orderData = {
-        email: formData.email,
-        phone: formData.phone,
-        shippingAddress,
-        paymentMethod: 'yoco',
-        paymentId: checkoutId,
-        paymentAmount: paymentAmount,
-        notes: `Payment processed via Yoco Checkout. Checkout ID: ${checkoutId}`,
-        items: state.items.map(item => ({
-          product_id: item.id,
-          quantity: item.quantity,
-          unit_price: item.price,
-          total_price: item.price * item.quantity,
-          name: item.name,
-          images: [item.image]
-        }))
-      }
-
-      const response = await fetch('/api/orders', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(orderData),
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to create order')
-      }
-
-      const result = await response.json()
-      return result
-    } catch (error) {
-      console.error('Error creating order:', error)
-      throw error
-    }
-  }
+  // Order creation moved to order-confirmation page after payment verification
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -209,15 +193,14 @@ export default function CheckoutForm() {
       const checkoutResult = await checkoutResponse.json()
       console.log('Checkout created successfully:', checkoutResult)
 
-      // Create order in database
-      const orderResult = await createOrder(checkoutResult.checkout.id, total)
-
-      if (!orderResult.success) {
-        throw new Error('Failed to create order')
-      }
-
-      // Clear cart
-      dispatch({ type: "CLEAR_CART" })
+      // Store checkout data in sessionStorage for order creation after payment
+      sessionStorage.setItem('pending_checkout', JSON.stringify({
+        checkoutId: checkoutResult.checkout.id,
+        amount: total,
+        formData: formData,
+        items: state.items,
+        checkoutUrl: checkoutResult.checkout.redirectUrl
+      }))
 
       // Redirect to Yoco checkout page
       console.log('Redirecting to Yoco checkout:', checkoutResult.checkout.redirectUrl)
@@ -253,10 +236,10 @@ export default function CheckoutForm() {
 
   return (
     <div>
-      <form onSubmit={handleSubmit} className="space-y-8">
+      <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
         {/* Contact Information */}
         <div>
-          <h2 className="font-dm-sans text-xl font-semibold text-gray-900 mb-6">Contact Information</h2>
+          <h2 className="font-dm-sans text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">Contact Information</h2>
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
               Email Address *
@@ -267,7 +250,7 @@ export default function CheckoutForm() {
               name="email"
               value={formData.email}
               onChange={handleInputChange}
-              className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-pink-600 focus:border-transparent ${
+              className={`w-full px-4 py-3 text-base bg-white text-gray-900 border rounded-lg focus:ring-2 focus:ring-pink-600 focus:border-transparent ${
                 errors.email ? "border-red-500" : "border-gray-300"
               }`}
               placeholder="your@email.com"
@@ -278,8 +261,8 @@ export default function CheckoutForm() {
 
         {/* Shipping Information */}
         <div>
-          <h2 className="font-dm-sans text-xl font-semibold text-gray-900 mb-6">Shipping Information</h2>
-          <div className="grid grid-cols-2 gap-4 mb-4">
+          <h2 className="font-dm-sans text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">Shipping Information</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
             <div>
               <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
                 First Name *
@@ -290,7 +273,7 @@ export default function CheckoutForm() {
                 name="firstName"
                 value={formData.firstName}
                 onChange={handleInputChange}
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-pink-600 focus:border-transparent ${
+                className={`w-full px-4 py-3 text-base bg-white text-gray-900 border rounded-lg focus:ring-2 focus:ring-pink-600 focus:border-transparent ${
                   errors.firstName ? "border-red-500" : "border-gray-300"
                 }`}
               />
@@ -306,7 +289,7 @@ export default function CheckoutForm() {
                 name="lastName"
                 value={formData.lastName}
                 onChange={handleInputChange}
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-pink-600 focus:border-transparent ${
+                className={`w-full px-4 py-3 text-base bg-white text-gray-900 border rounded-lg focus:ring-2 focus:ring-pink-600 focus:border-transparent ${
                   errors.lastName ? "border-red-500" : "border-gray-300"
                 }`}
               />
@@ -324,7 +307,7 @@ export default function CheckoutForm() {
               name="address"
               value={formData.address}
               onChange={handleInputChange}
-              className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-pink-600 focus:border-transparent ${
+              className={`w-full px-4 py-3 text-base bg-white text-gray-900 border rounded-lg focus:ring-2 focus:ring-pink-600 focus:border-transparent ${
                 errors.address ? "border-red-500" : "border-gray-300"
               }`}
               placeholder="123 Main Street"
@@ -332,7 +315,7 @@ export default function CheckoutForm() {
             {errors.address && <p className="mt-1 text-sm text-red-600">{errors.address}</p>}
           </div>
 
-          <div className="grid grid-cols-2 gap-4 mb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
             <div>
               <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-2">
                 City *
@@ -343,7 +326,7 @@ export default function CheckoutForm() {
                 name="city"
                 value={formData.city}
                 onChange={handleInputChange}
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-pink-600 focus:border-transparent ${
+                className={`w-full px-4 py-3 text-base bg-white text-gray-900 border rounded-lg focus:ring-2 focus:ring-pink-600 focus:border-transparent ${
                   errors.city ? "border-red-500" : "border-gray-300"
                 }`}
               />
@@ -359,7 +342,7 @@ export default function CheckoutForm() {
                 name="postalCode"
                 value={formData.postalCode}
                 onChange={handleInputChange}
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-pink-600 focus:border-transparent ${
+                className={`w-full px-4 py-3 text-base bg-white text-gray-900 border rounded-lg focus:ring-2 focus:ring-pink-600 focus:border-transparent ${
                   errors.postalCode ? "border-red-500" : "border-gray-300"
                 }`}
               />
@@ -377,7 +360,7 @@ export default function CheckoutForm() {
               name="phone"
               value={formData.phone}
               onChange={handleInputChange}
-              className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-pink-600 focus:border-transparent ${
+              className={`w-full px-4 py-3 text-base bg-white text-gray-900 border rounded-lg focus:ring-2 focus:ring-pink-600 focus:border-transparent ${
                 errors.phone ? "border-red-500" : "border-gray-300"
               }`}
               placeholder="0123456789"
@@ -386,64 +369,26 @@ export default function CheckoutForm() {
           </div>
         </div>
 
-        {/* Payment Information */}
-        <div>
-          <h2 className="font-dm-sans text-xl font-semibold text-gray-900 mb-6 flex items-center">
-            <CreditCard className="w-5 h-5 mr-2" />
-            Payment Information
-          </h2>
-          
-          <div className="bg-gray-50 p-6 rounded-lg border">
-            <div className="flex items-center mb-4">
-              <img 
-                src="https://www.yoco.com/static/images/yoco-logo.svg" 
-                alt="Yoco" 
-                className="h-8 mr-3"
-              />
-              <span className="font-medium text-gray-900">Secure Payment with Yoco</span>
-            </div>
-            <p className="text-sm text-gray-600 mb-4">
-              You'll be redirected to Yoco's secure payment page to complete your purchase. We accept all major credit and debit cards.
-            </p>
-            <div className="flex space-x-2">
-              <img src="https://www.yoco.com/static/images/payment-methods/visa.svg" alt="Visa" className="h-6" />
-              <img src="https://www.yoco.com/static/images/payment-methods/mastercard.svg" alt="Mastercard" className="h-6" />
-              <img src="https://www.yoco.com/static/images/payment-methods/amex.svg" alt="American Express" className="h-6" />
-            </div>
-          </div>
-        </div>
-
         {/* Trust Signals */}
-        <div className="grid grid-cols-3 gap-4 text-center text-sm text-gray-600 py-6 border-t">
+        <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center text-xs sm:text-sm text-gray-600 py-4 sm:py-6 border-t">
           <div className="flex flex-col items-center">
-            <Shield className="w-6 h-6 text-pink-600 mb-2" />
-            <span>Secure Checkout</span>
+            <Shield className="w-5 h-5 sm:w-6 sm:h-6 text-pink-600 mb-1 sm:mb-2" />
+            <span className="break-words">Secure Checkout</span>
           </div>
           <div className="flex flex-col items-center">
-            <Truck className="w-6 h-6 text-pink-600 mb-2" />
-            <span>Fast Shipping</span>
+            <Truck className="w-5 h-5 sm:w-6 sm:h-6 text-pink-600 mb-1 sm:mb-2" />
+            <span className="break-words">Fast Shipping</span>
           </div>
           <div className="flex flex-col items-center">
-            <RotateCcw className="w-6 h-6 text-pink-600 mb-2" />
-            <span>30-Day Return</span>
+            <RotateCcw className="w-5 h-5 sm:w-6 sm:h-6 text-pink-600 mb-1 sm:mb-2" />
+            <span className="break-words">30-Day Return</span>
           </div>
         </div>
-
-        {/* Debug Info (remove in production) */}
-        {process.env.NODE_ENV === 'development' && (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-sm">
-            <p><strong>Debug Info:</strong></p>
-            <p>Cart Items: {state.items.length}</p>
-            <p>Cart Total: R{state.total}</p>
-            <p>Button Disabled: {isButtonDisabled ? 'Yes' : 'No'}</p>
-            <p>Processing: {isProcessing ? 'Yes' : 'No'}</p>
-          </div>
-        )}
 
         <button
           type="submit"
           disabled={isButtonDisabled}
-          className="w-full bg-pink-600 hover:bg-pink-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold py-4 px-6 rounded-lg transition-colors flex items-center justify-center space-x-2"
+          className="w-full bg-pink-600 hover:bg-pink-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold py-3 sm:py-4 px-6 rounded-lg transition-colors flex items-center justify-center space-x-2 text-base sm:text-lg touch-manipulation"
         >
           {isProcessing ? (
             <>
@@ -458,7 +403,7 @@ export default function CheckoutForm() {
           )}
         </button>
 
-        <div className="text-center text-sm text-gray-600">
+        <div className="text-center text-xs sm:text-sm text-gray-600 px-2">
           <p>By completing your order, you agree to our</p>
           <p>
             <a href="#" className="text-pink-600 hover:underline">
@@ -474,3 +419,4 @@ export default function CheckoutForm() {
     </div>
   )
 }
+

@@ -1,70 +1,71 @@
 "use client"
 
 import { useState } from "react"
+import Link from "next/link"
 import { ChevronDown, ChevronUp, Heart, Droplets, Sparkles, Leaf, Award } from "lucide-react"
 
 const educationSections = [
   {
     id: "ingredients",
-    title: "Powerful Ingredients That Work",
+    title: "Product Specifications & Features",
     icon: Droplets,
     content: {
       intro:
-        "Our scientifically-formulated serum combines the most effective ingredients for under-eye care, each chosen for its proven benefits and gentle nature.",
+        "The Lumeye Glow Wand and Glow Gel are precision-engineered for optimal LED light therapy results. Each component is designed to work together for maximum efficacy.",
       ingredients: [
         {
-          name: "Caffeine (2%)",
-          benefit: "Reduces Puffiness",
+          name: "660nm Red LED Technology",
+          benefit: "Optimal Wavelength",
           description:
-            "Clinically proven to constrict blood vessels and reduce fluid retention, giving you instantly depuffed eyes.",
+            "Clinically proven wavelength that penetrates deep into the dermis to stimulate collagen production and cellular renewal.",
         },
         {
-          name: "Vitamin C (L-Ascorbic Acid)",
-          benefit: "Brightens Dark Circles",
-          description:
-            "A powerful antioxidant that brightens skin tone and stimulates collagen production for firmer, more radiant under-eyes.",
-        },
-        {
-          name: "Hyaluronic Acid",
+          name: "Hyaluronic Acid Formula",
           benefit: "Deep Hydration",
           description:
-            "Holds up to 1000x its weight in water, providing intense hydration that plumps fine lines and smooths skin texture.",
+            "The Glow Gel contains hyaluronic acid that holds up to 1000x its weight in water, providing intense hydration while enhancing LED conductivity.",
         },
         {
-          name: "Peptides Complex",
-          benefit: "Anti-Aging",
+          name: "Aloe Complex",
+          benefit: "Soothing & Calming",
           description:
-            "Stimulates collagen synthesis and improves skin elasticity, reducing the appearance of fine lines and wrinkles.",
+            "Formulated with soothing aloe to ensure comfort during treatment and enhance the skin's natural repair processes.",
+        },
+        {
+          name: "USB-C Rechargeable",
+          benefit: "Convenient & Long-Lasting",
+          description:
+            "Rechargeable battery provides 60+ treatment sessions per charge, making it perfect for daily use.",
         },
       ],
     },
   },
   {
     id: "science",
-    title: "The Science Behind Lumeye",
+    title: "The Science Behind Red Light Therapy",
     icon: Award,
     content: {
       intro:
-        "Backed by clinical research and dermatologist testing, our formula delivers measurable results in just 60 seconds.",
+        "Red light therapy is backed by clinical research showing measurable improvements in skin health, collagen production, and cellular renewal.",
       studies: [
         {
           title: "Clinical Study Results",
-          description: "In a 4-week clinical study with 50 participants:",
+          description: "In clinical studies of red light therapy at 660nm wavelength:",
           results: [
-            "94% saw reduced puffiness within 60 seconds",
-            "87% noticed brighter under-eyes after 1 week",
-            "92% reported smoother, more hydrated skin",
-            "89% would recommend to friends and family",
+            "Significant increase in collagen production after 4 weeks",
+            "Improved skin texture and firmness in 85% of participants",
+            "Reduced appearance of fine lines and wrinkles",
+            "Enhanced skin radiance and even tone",
           ],
         },
         {
-          title: "Dermatologist Tested",
-          description: "Our formula has been rigorously tested by certified dermatologists:",
+          title: "Dermatologist Tested & Safe",
+          description: "The Lumeye Glow Wand is designed for safe, daily use:",
           results: [
-            "Hypoallergenic and non-comedogenic",
-            "Safe for sensitive skin and contact lens wearers",
-            "pH balanced to match natural skin levels",
-            "Free from parabens, sulfates, and artificial fragrances",
+            "No UV rays - completely safe for all skin types",
+            "No heat generation - comfortable treatment experience",
+            "FDA-cleared wavelength technology",
+            "Suitable for sensitive skin and all ages",
           ],
         },
       ],
@@ -75,35 +76,35 @@ const educationSections = [
     title: "How to Get Maximum Results",
     icon: Sparkles,
     content: {
-      intro: "Follow our expert-recommended application technique for the best results from your Lumeye serum.",
+      intro: "Follow our expert-recommended routine for the best results from your Lumeye LED therapy system.",
       steps: [
         {
           step: 1,
           title: "Cleanse & Prep",
           description:
-            "Start with clean, dry skin. Remove all makeup and gently pat the under-eye area dry with a soft towel.",
-          tip: "Pro tip: Use lukewarm water to avoid irritating the delicate eye area.",
+            "Start with clean, dry skin. Remove all makeup and gently pat your face dry with a soft towel.",
+          tip: "Pro tip: Ensure your skin is completely dry before applying the gel for optimal LED conductivity.",
         },
         {
           step: 2,
-          title: "Apply Serum",
+          title: "Apply Lumeye Glow Gel",
           description:
-            "Dispense 2-3 pumps onto your ring finger (the gentlest finger). Apply in small dots under each eye, from inner to outer corner.",
-          tip: "Pro tip: Keep the serum at least 5mm away from the lash line to prevent irritation.",
+            "Apply a thin, even layer of Lumeye Glow Gel to the areas you want to treat (face, under-eyes, or specific zones).",
+          tip: "Pro tip: The gel enhances LED penetration, so a thin layer is all you need for maximum results.",
         },
         {
           step: 3,
-          title: "Gentle Massage",
+          title: "Glide the Wand for 5 Minutes",
           description:
-            "Using your ring finger, gently tap and press the serum into the skin. Never rub or pull the delicate under-eye area.",
-          tip: "Pro tip: Use a light tapping motion to stimulate circulation and enhance absorption.",
+            "Turn on the Lumeye Glow Wand and glide it slowly over your skin in circular motions. Keep the wand in gentle contact with your skin, moving continuously.",
+          tip: "Pro tip: Use slow, deliberate movements to ensure even light exposure across all treatment areas.",
         },
         {
           step: 4,
-          title: "Wait & Layer",
+          title: "Complete Your Routine",
           description:
-            "Allow 60 seconds for full absorption before applying moisturizer or makeup. Use morning and evening for best results.",
-          tip: "Pro tip: Store in the refrigerator for an extra cooling, depuffing effect.",
+            "After your 5-minute treatment, follow with your regular moisturizer to lock in the benefits. Use once daily for best results.",
+          tip: "Pro tip: Consistency is key - daily use over 4 weeks will show the most visible improvements.",
         },
       ],
     },
@@ -168,7 +169,7 @@ export default function ProductEducation() {
       <div className="text-center mb-12">
         <h2 className="font-dm-sans text-3xl font-bold text-gray-900 mb-4">Learn More About Lumeye</h2>
         <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-          Discover the science, ingredients, and care that goes into every bottle of our premium under-eye serum.
+          Discover the science, technology, and innovation that goes into the Lumeye LED light therapy system.
         </p>
       </div>
 
@@ -299,14 +300,15 @@ export default function ProductEducation() {
 
       {/* Call to Action */}
       <div className="mt-12 text-center bg-pink-600 text-white rounded-2xl p-8">
-        <h3 className="font-dm-sans text-2xl font-bold mb-4">Ready to Transform Your Under-Eyes?</h3>
+        <h3 className="font-dm-sans text-2xl font-bold mb-4">Ready to Transform Your Skin?</h3>
         <p className="text-pink-100 mb-6 max-w-2xl mx-auto">
-          Join thousands of satisfied customers who have discovered the power of Lumeye. Experience the difference in
-          just 60 seconds.
+          Join thousands of satisfied customers who have discovered the power of Lumeye LED therapy. Experience visible results in as little as 4 weeks.
         </p>
-        <button className="bg-white text-pink-600 px-8 py-4 rounded-full font-bold text-lg hover:bg-gray-100 transition-colors">
-          Add to Cart - R159
-        </button>
+        <Link href="/product">
+          <button className="bg-white text-pink-600 px-8 py-4 rounded-lg font-bold text-lg hover:bg-gray-100 transition-colors">
+            Shop Now
+          </button>
+        </Link>
       </div>
     </section>
   )
