@@ -22,6 +22,8 @@ export default function Header() {
               height={40}
               className="h-8 w-auto"
               priority
+              quality={85}
+              sizes="120px"
             />
           </Link>
 

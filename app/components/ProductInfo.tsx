@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
@@ -46,8 +46,25 @@ export default function ProductInfo({ selectedProduct: externalSelectedProduct, 
   const [internalSelectedProduct, setInternalSelectedProduct] = useState<ProductType>("wand")
   const selectedProduct = externalSelectedProduct ?? internalSelectedProduct
   const [quantity, setQuantity] = useState(1)
+  const [reviewCount, setReviewCount] = useState(0)
   const { dispatch } = useCart()
   const router = useRouter()
+
+  useEffect(() => {
+    // Fetch review count
+    const fetchReviewCount = async () => {
+      try {
+        const response = await fetch('/api/reviews')
+        const data = await response.json()
+        if (data.totalReviews) {
+          setReviewCount(data.totalReviews)
+        }
+      } catch (error) {
+        console.error('Failed to fetch review count:', error)
+      }
+    }
+    fetchReviewCount()
+  }, [])
 
   const handleProductSelect = (product: ProductType) => {
     setInternalSelectedProduct(product)
@@ -165,7 +182,7 @@ export default function ProductInfo({ selectedProduct: externalSelectedProduct, 
               <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
             ))}
           </div>
-          <span className="text-gray-600">(127 reviews)</span>
+          <span className="text-gray-600">({reviewCount || 0} reviews)</span>
         </div>
 
         {/* Price Display */}

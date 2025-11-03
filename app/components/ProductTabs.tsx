@@ -1,9 +1,20 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Star } from "lucide-react"
 
-const tabs = [
+interface ReviewStats {
+  totalReviews: number
+  averageRating: number
+  verifiedPurchases: number
+  reviews: Array<{
+    name: string
+    rating: number
+    text: string
+  }>
+}
+
+const getTabs = (reviewStats: ReviewStats) => [
   {
     id: "overview",
     label: "Overview",
@@ -104,16 +115,12 @@ const tabs = [
               <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
             ))}
           </div>
-          <span className="text-lg font-medium">4.9 out of 5</span>
-          <span className="text-gray-600">(127 reviews)</span>
+          <span className="text-lg font-medium">{reviewStats.averageRating.toFixed(1)} out of 5</span>
+          <span className="text-gray-600">({reviewStats.totalReviews} reviews)</span>
         </div>
 
         <div className="space-y-4">
-          {[
-            { name: "Sarah K.", rating: 5, text: "Amazing results! My under-eyes look so much brighter." },
-            { name: "Lisa M.", rating: 5, text: "Works instantly and lasts all day. Love this product!" },
-            { name: "Jennifer R.", rating: 4, text: "Great for sensitive skin. No irritation at all." },
-          ].map((review, index) => (
+          {reviewStats.reviews.slice(0, 3).map((review, index) => (
             <div key={index} className="border-b border-gray-200 pb-4">
               <div className="flex items-center mb-2">
                 <div className="flex items-center mr-4">
@@ -134,12 +141,42 @@ const tabs = [
 
 export default function ProductTabs() {
   const [activeTab, setActiveTab] = useState("overview")
+  const [reviewStats, setReviewStats] = useState<ReviewStats>({
+    totalReviews: 0,
+    averageRating: 0,
+    verifiedPurchases: 0,
+    reviews: []
+  })
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const response = await fetch('/api/reviews')
+        const data = await response.json()
+        if (data.reviews) {
+          setReviewStats({
+            totalReviews: data.totalReviews || 0,
+            averageRating: data.averageRating || 0,
+            verifiedPurchases: data.verifiedPurchases || 0,
+            reviews: data.reviews.map((r: any) => ({
+              name: r.name,
+              rating: r.rating,
+              text: r.text
+            })).slice(0, 3) // Only show top 3 in tabs
+          })
+        }
+      } catch (error) {
+        console.error('Failed to fetch reviews:', error)
+      }
+    }
+    fetchReviews()
+  }, [])
 
   return (
     <div className="border-t border-gray-200 pt-12">
       <div className="border-b border-gray-200 mb-8">
         <nav className="flex space-x-8">
-          {tabs.map((tab) => (
+          {getTabs(reviewStats).map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
@@ -155,7 +192,7 @@ export default function ProductTabs() {
         </nav>
       </div>
 
-      <div className="min-h-[300px]">{tabs.find((tab) => tab.id === activeTab)?.content}</div>
+      <div className="min-h-[300px]">{getTabs(reviewStats).find((tab) => tab.id === activeTab)?.content}</div>
     </div>
   )
 }
