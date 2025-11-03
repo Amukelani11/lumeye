@@ -22,9 +22,15 @@ export default function ProductReviews() {
   const [verifiedReviews, setVerifiedReviews] = useState(0)
 
   useEffect(() => {
+    // Only fetch on client side, not during SSR/build
+    if (typeof window === 'undefined') return
+
     const fetchReviews = async () => {
       try {
         const response = await fetch('/api/reviews')
+        if (!response.ok) {
+          throw new Error('Failed to fetch reviews')
+        }
         const data = await response.json()
         
         if (data.reviews) {
@@ -34,6 +40,7 @@ export default function ProductReviews() {
         }
       } catch (error) {
         console.error('Failed to fetch reviews:', error)
+        // Don't fail the page if reviews can't be fetched
       } finally {
         setLoading(false)
       }

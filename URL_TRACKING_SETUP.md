@@ -1,6 +1,6 @@
 # URL Parameter Tracking Setup
 
-This system captures URL parameters (UTM parameters, Facebook click IDs, Google click IDs, etc.) to track which campaigns and sources lead to purchases.
+This system captures URL parameters (UTM parameters, Google click IDs, etc.) to track which campaigns and sources lead to purchases.
 
 ## How It Works
 
@@ -19,7 +19,6 @@ This system captures URL parameters (UTM parameters, Facebook click IDs, Google 
 - `utm_content` - The content identifier (for A/B testing)
 
 ### Platform-Specific
-- `fbclid` - Facebook Click ID (automatically added by Facebook)
 - `gclid` - Google Click ID (automatically added by Google Ads)
 
 ### Custom Parameters
@@ -31,7 +30,6 @@ This system captures URL parameters (UTM parameters, Facebook click IDs, Google 
 
 ```
 https://lumeye.co.za/product?utm_source=facebook&utm_medium=cpc&utm_campaign=summer_sale
-https://lumeye.co.za/?fbclid=ABC123&utm_source=facebook&utm_medium=social
 https://lumeye.co.za/product?gclid=XYZ789&utm_source=google&utm_medium=cpc&utm_campaign=led_therapy
 ```
 

@@ -1,6 +1,6 @@
 /**
  * URL Parameter Tracking Utility
- * Captures and stores URL parameters (UTM, Facebook click IDs, etc.) for purchase attribution
+ * Captures and stores URL parameters (UTM, Google click IDs, etc.) for purchase attribution
  */
 
 export interface TrackingParams {
@@ -10,9 +10,6 @@ export interface TrackingParams {
   utm_campaign?: string
   utm_term?: string
   utm_content?: string
-  
-  // Facebook Parameters
-  fbclid?: string
   
   // Google Parameters
   gclid?: string
@@ -45,9 +42,6 @@ export function extractTrackingParams(url?: string): TrackingParams {
     if (searchParams.has('utm_campaign')) params.utm_campaign = searchParams.get('utm_campaign') || undefined
     if (searchParams.has('utm_term')) params.utm_term = searchParams.get('utm_term') || undefined
     if (searchParams.has('utm_content')) params.utm_content = searchParams.get('utm_content') || undefined
-    
-    // Facebook Click ID
-    if (searchParams.has('fbclid')) params.fbclid = searchParams.get('fbclid') || undefined
     
     // Google Click ID
     if (searchParams.has('gclid')) params.gclid = searchParams.get('gclid') || undefined
