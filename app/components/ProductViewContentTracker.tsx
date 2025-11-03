@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect } from "react"
-import { useSearchParams } from "next/navigation"
 import { trackViewContent } from "@/lib/facebook-pixel-events"
 
 interface ProductViewContentTrackerProps {
@@ -18,8 +17,6 @@ export default function ProductViewContentTracker({
   productName, 
   productPrice 
 }: ProductViewContentTrackerProps) {
-  const searchParams = useSearchParams()
-  
   useEffect(() => {
     // Track ViewContent event for product page
     trackViewContent({
