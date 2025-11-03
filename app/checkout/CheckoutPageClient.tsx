@@ -8,6 +8,7 @@ import Link from "next/link"
 import { ArrowLeft, ShoppingBag } from "lucide-react"
 import Footer from "../components/Footer"
 import { trackInitiateCheckout } from "@/lib/facebook-pixel-events"
+import { trackBeginCheckout } from "@/lib/google-analytics-events"
 
 export default function CheckoutPageClient() {
   const { state } = useCart()
@@ -29,6 +30,18 @@ export default function CheckoutPageClient() {
         currency: 'ZAR',
         num_items: state.itemCount,
         contents: contents
+      })
+      
+      // Track BeginCheckout event for Google Analytics
+      trackBeginCheckout({
+        currency: 'ZAR',
+        value: state.total,
+        items: state.items.map(item => ({
+          item_id: item.id,
+          item_name: item.name,
+          quantity: item.quantity,
+          price: item.price
+        }))
       })
     }
   }, []) // Only track once on mount

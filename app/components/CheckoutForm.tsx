@@ -23,6 +23,9 @@ interface FormErrors {
 export default function CheckoutForm() {
   const { state, dispatch } = useCart()
   const [isProcessing, setIsProcessing] = useState(false)
+  const [discountCode, setDiscountCode] = useState("")
+  const [discountError, setDiscountError] = useState("")
+  const [applyingDiscount, setApplyingDiscount] = useState(false)
   const [formData, setFormData] = useState<FormData>({
     email: "",
     firstName: "",
@@ -34,33 +37,77 @@ export default function CheckoutForm() {
   })
   const [errors, setErrors] = useState<FormErrors>({})
 
-  // Track checkout abandonment when user is on checkout page
+  // Load discount code from localStorage on mount
   useEffect(() => {
-    if (state.items.length > 0) {
+    const savedCode = localStorage.getItem('lumeye_discount_code')
+    if (savedCode && !state.discountCode) {
+      handleApplyDiscount(savedCode)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const handleApplyDiscount = async (code?: string) => {
+    const codeToApply = code || discountCode.trim()
+    if (!codeToApply) return
+
+    setDiscountError("")
+    setApplyingDiscount(true)
+
+    try {
+      const response = await fetch('/api/discount/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: codeToApply })
+      })
+
+      const data = await response.json()
+
+      if (data.valid && data.discountPercentage) {
+        dispatch({
+          type: 'APPLY_DISCOUNT',
+          payload: { code: data.code, percentage: data.discountPercentage }
+        })
+        setDiscountCode(data.code)
+        localStorage.setItem('lumeye_discount_code', data.code)
+      } else {
+        setDiscountError(data.error || 'Invalid discount code')
+        dispatch({ type: 'REMOVE_DISCOUNT' })
+      }
+    } catch (err) {
+      console.error('Error validating discount code:', err)
+      setDiscountError('Failed to validate discount code')
+      dispatch({ type: 'REMOVE_DISCOUNT' })
+    } finally {
+      setApplyingDiscount(false)
+    }
+  }
+
+  // Track checkout abandonment immediately when email is entered
+  useEffect(() => {
+    if (state.items.length > 0 && formData.email && formData.email.includes('@')) {
       const sessionId = localStorage.getItem('cart_session_id') || `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
       localStorage.setItem('cart_session_id', sessionId)
       
-      // Track checkout abandonment after 10 seconds (user started checkout but didn't complete)
+      // Debounce to avoid too many API calls
       const timeoutId = setTimeout(() => {
-        if (formData.email && formData.email.includes('@')) {
-          fetch('/api/track-checkout-abandonment', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              sessionId,
-              email: formData.email,
-              checkoutItems: state.items.map(item => ({
-                product_name: item.name,
-                quantity: item.quantity,
-                unit_price: item.price,
-                product_image: item.image
-              })),
-              totalValue: state.total,
-              formData: formData
-            })
-          }).catch(err => console.error('Checkout abandonment tracking error:', err))
-        }
-      }, 10000)
+        fetch('/api/track-checkout-abandonment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sessionId,
+            email: formData.email,
+            checkoutItems: state.items.map(item => ({
+              id: item.id,
+              product_name: item.name,
+              quantity: item.quantity,
+              unit_price: item.price,
+              product_image: item.image
+            })),
+            totalValue: state.total,
+            formData: formData
+          })
+        }).catch(err => console.error('Checkout abandonment tracking error:', err))
+      }, 1000) // Small delay to avoid excessive calls
       
       return () => clearTimeout(timeoutId)
     }
@@ -75,23 +122,7 @@ export default function CheckoutForm() {
       setErrors((prev) => ({ ...prev, [name]: "" }))
     }
 
-    // Capture email for abandoned cart tracking
-    if (name === 'email' && value && value.includes('@')) {
-      const sessionId = localStorage.getItem('cart_session_id') || `session_${Date.now()}`
-      fetch('/api/capture-email', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: value,
-          sessionId,
-          cartData: state.items
-        }),
-      }).catch(error => {
-        console.error('Error capturing email:', error)
-      })
-    }
+    // Email is now tracked immediately via useEffect above
   }
 
   const validateForm = (): boolean => {
@@ -145,10 +176,11 @@ export default function CheckoutForm() {
     setIsProcessing(true)
 
     try {
-      // Calculate total amount
-      const subtotal = state.total
+      // Calculate total amount with discount
+      const subtotal = state.items.reduce((sum, item) => sum + item.price * item.quantity, 0)
+      const discount = state.discountPercentage ? subtotal * (state.discountPercentage / 100) : 0
       const shipping = 0 as number // Free shipping for all orders
-      const total = subtotal + shipping
+      const total = subtotal - discount + shipping
 
       console.log('Creating Yoco checkout for amount:', total)
       console.log('Cart items:', state.items)
@@ -242,6 +274,42 @@ export default function CheckoutForm() {
   return (
     <div>
       <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
+        {/* Discount Code */}
+        {!state.discountCode && (
+          <div className="bg-pink-50 border border-pink-200 rounded-lg p-4">
+            <label htmlFor="discountCode" className="block text-sm font-medium text-gray-700 mb-2">
+              Have a discount code?
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                id="discountCode"
+                value={discountCode}
+                onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
+                onKeyPress={(e) => e.key === 'Enter' && handleApplyDiscount()}
+                className={`flex-1 px-4 py-2 text-base bg-white text-gray-900 border rounded-lg focus:ring-2 focus:ring-pink-600 focus:border-transparent ${
+                  discountError ? "border-red-500" : "border-gray-300"
+                }`}
+                placeholder="Enter discount code"
+              />
+              <button
+                type="button"
+                onClick={() => handleApplyDiscount()}
+                disabled={applyingDiscount || !discountCode.trim()}
+                className="px-4 py-2 bg-pink-600 hover:bg-pink-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors"
+              >
+                {applyingDiscount ? "..." : "Apply"}
+              </button>
+            </div>
+            {discountError && <p className="mt-1 text-sm text-red-600">{discountError}</p>}
+            {state.discountCode && (
+              <p className="mt-2 text-sm text-green-600">
+                ✓ Discount code applied: {state.discountCode}
+              </p>
+            )}
+          </div>
+        )}
+
         {/* Contact Information */}
         <div>
           <h2 className="font-dm-sans text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">Contact Information</h2>

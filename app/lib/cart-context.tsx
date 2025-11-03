@@ -15,6 +15,8 @@ interface CartState {
   items: CartItem[]
   total: number
   itemCount: number
+  discountCode?: string
+  discountPercentage?: number
 }
 
 type CartAction =
@@ -24,6 +26,8 @@ type CartAction =
   | { type: "CLEAR_CART" }
   | { type: "LOAD_CART"; payload: CartItem[] }
   | { type: "BUY_NOW"; payload: Omit<CartItem, "quantity"> }
+  | { type: "APPLY_DISCOUNT"; payload: { code: string; percentage: number } }
+  | { type: "REMOVE_DISCOUNT" }
 
 const CartContext = createContext<{
   state: CartState
@@ -64,7 +68,13 @@ function cartReducer(state: CartState, action: CartAction): CartState {
     }
 
     case "CLEAR_CART":
-      return { items: [], total: 0, itemCount: 0 }
+      return { items: [], total: 0, itemCount: 0, discountCode: undefined, discountPercentage: undefined }
+
+    case "APPLY_DISCOUNT":
+      return { ...state, discountCode: action.payload.code, discountPercentage: action.payload.percentage }
+
+    case "REMOVE_DISCOUNT":
+      return { ...state, discountCode: undefined, discountPercentage: undefined }
 
     case "LOAD_CART":
       return calculateTotals({ ...state, items: action.payload })
@@ -121,8 +131,16 @@ function calculateTotals(state: Omit<CartState, "total" | "itemCount">): CartSta
     }
   }
   
-  const total = processedItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
+  let subtotal = processedItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
   const itemCount = processedItems.reduce((sum, item) => sum + item.quantity, 0)
+  
+  // Apply discount if present
+  let total = subtotal
+  if (state.discountPercentage) {
+    const discount = subtotal * (state.discountPercentage / 100)
+    total = subtotal - discount
+  }
+  
   return { ...state, items: processedItems, total, itemCount }
 }
 
@@ -131,10 +149,35 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     items: [],
     total: 0,
     itemCount: 0,
+    discountCode: undefined,
+    discountPercentage: undefined,
   })
 
-  // Load cart from localStorage on mount
+  // Load cart and discount code from localStorage on mount
   useEffect(() => {
+    // Load discount code
+    const savedDiscountCode = localStorage.getItem('lumeye_discount_code')
+    if (savedDiscountCode) {
+      // Validate discount code
+      fetch('/api/discount/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: savedDiscountCode })
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.valid && data.discountPercentage) {
+            dispatch({
+              type: 'APPLY_DISCOUNT',
+              payload: { code: savedDiscountCode, percentage: data.discountPercentage }
+            })
+          } else {
+            localStorage.removeItem('lumeye_discount_code')
+          }
+        })
+        .catch(err => console.error('Error validating discount code:', err))
+    }
+
     const savedCart = localStorage.getItem("lumeye-cart")
     if (savedCart) {
       try {

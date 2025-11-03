@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Sidebar from "../components/Sidebar"
+import AdminCodeAuth from "../components/AdminCodeAuth"
 import { Search, Plus, Edit, Eye } from "lucide-react"
 
 interface Product {
@@ -44,9 +45,10 @@ export default function ProductsPage() {
   )
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col lg:flex-row">
-      <Sidebar />
-      <main className="flex-1 p-4 sm:p-8">
+    <AdminCodeAuth>
+      <div className="min-h-screen bg-gray-50 flex flex-col lg:flex-row">
+        <Sidebar />
+        <main className="flex-1 p-4 sm:p-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Products Management</h1>
           <p className="text-gray-600">Manage your product catalog</p>
@@ -186,5 +188,6 @@ export default function ProductsPage() {
         )}
       </main>
     </div>
+    </AdminCodeAuth>
   )
 } 

@@ -6,6 +6,7 @@ import Link from "next/link"
 import { useSearchParams, useRouter } from "next/navigation"
 import { getStoredTrackingParams, clearTrackingParams } from "@/lib/url-tracking"
 import { trackPurchase } from "@/lib/facebook-pixel-events"
+import { trackPurchase as trackGAPurchase } from "@/lib/google-analytics-events"
 
 function OrderConfirmationContentInner() {
   const searchParams = useSearchParams()
@@ -121,6 +122,7 @@ function OrderConfirmationContentInner() {
           item_price: item.price
         }))
 
+        // Track Purchase event for Facebook Pixel
         trackPurchase({
           content_ids: contentIds,
           content_type: 'product',
@@ -129,6 +131,19 @@ function OrderConfirmationContentInner() {
           num_items: pendingCheckout.items.reduce((sum: number, item: any) => sum + item.quantity, 0),
           contents: contents,
           order_id: orderNum || undefined
+        })
+        
+        // Track Purchase event for Google Analytics
+        trackGAPurchase({
+          currency: 'ZAR',
+          value: pendingCheckout.amount,
+          transaction_id: orderNum || undefined,
+          items: pendingCheckout.items.map((item: any) => ({
+            item_id: item.id,
+            item_name: item.name || 'Lumeye Product',
+            quantity: item.quantity,
+            price: item.price
+          }))
         })
 
         // Mark order as created to prevent duplicates on refresh

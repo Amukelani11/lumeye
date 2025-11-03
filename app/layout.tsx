@@ -7,6 +7,7 @@ import Header from "./components/Header"
 import { CartProvider } from "./lib/cart-context"
 import ClientVisitorTracker from "./components/ClientVisitorTracker"
 import ClientTrackingInit from "./components/ClientTrackingInit"
+import DiscountPopup from "./components/DiscountPopup"
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -89,6 +90,23 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${dmSans.variable} ${inter.variable}`}>
       <body className="font-inter bg-white">
+        {/* Google tag (gtag.js) */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-15QPP5ED0B"
+          strategy="afterInteractive"
+        />
+        <Script
+          id="google-analytics"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-15QPP5ED0B');
+            `,
+          }}
+        />
         {/* Meta Pixel Code */}
         <Script
           id="facebook-pixel"
@@ -121,6 +139,7 @@ export default function RootLayout({
         <CartProvider>
           <ClientTrackingInit />
           <ClientVisitorTracker />
+          <DiscountPopup />
           <Header />
           {children}
         </CartProvider>

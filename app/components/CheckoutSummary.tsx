@@ -6,9 +6,11 @@ import { useCart } from "../lib/cart-context"
 export default function CheckoutSummary() {
   const { state } = useCart()
 
-  const subtotal = state.total
+  // Calculate subtotal before discount
+  const subtotal = state.items.reduce((sum, item) => sum + item.price * item.quantity, 0)
+  const discount = state.discountPercentage ? subtotal * (state.discountPercentage / 100) : 0
   const shipping = 0 as number // Free shipping for all orders
-  const total = subtotal + shipping
+  const total = subtotal - discount + shipping
 
   return (
     <div className="bg-cool-grey p-4 sm:p-6 lg:p-8 rounded-xl sm:rounded-2xl h-fit sticky top-4 lg:top-8">
@@ -47,6 +49,12 @@ export default function CheckoutSummary() {
           <span>Subtotal</span>
           <span>R{subtotal.toFixed(2)}</span>
         </div>
+        {discount > 0 && (
+          <div className="flex justify-between text-sm sm:text-base text-green-600">
+            <span>Discount ({state.discountPercentage}%)</span>
+            <span className="font-medium">-R{discount.toFixed(2)}</span>
+          </div>
+        )}
         <div className="flex justify-between text-sm sm:text-base text-gray-600">
           <span>Shipping</span>
           <span className={shipping === 0 ? "text-green-600 font-medium" : ""}>

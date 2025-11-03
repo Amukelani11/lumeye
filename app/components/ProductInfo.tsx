@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation"
 import { Star, Minus, Plus, ShoppingBag, Zap, Check } from "lucide-react"
 import { useCart } from "../lib/cart-context"
 import { trackAddToCart } from "@/lib/facebook-pixel-events"
+import { trackAddToCart as trackGAAddToCart } from "@/lib/google-analytics-events"
 
 type ProductType = "wand" | "gel" | "bundle"
 
@@ -108,6 +109,18 @@ export default function ProductInfo({ selectedProduct: externalSelectedProduct, 
       }]
     })
     
+    // Track AddToCart event for Google Analytics
+    trackGAAddToCart({
+      currency: 'ZAR',
+      value: product.price * finalQuantity,
+      items: [{
+        item_id: product.id,
+        item_name: product.name,
+        quantity: finalQuantity,
+        price: product.price
+      }]
+    })
+    
     if (!productType) {
       setQuantity(1)
     }
@@ -125,7 +138,7 @@ export default function ProductInfo({ selectedProduct: externalSelectedProduct, 
       },
     })
     
-    // Track AddToCart event for bundle
+    // Track AddToCart event for bundle - Facebook Pixel
     trackAddToCart({
       content_name: products.bundle.name,
       content_ids: [products.bundle.id],
@@ -136,6 +149,18 @@ export default function ProductInfo({ selectedProduct: externalSelectedProduct, 
         id: products.bundle.id,
         quantity: 1,
         item_price: products.bundle.price
+      }]
+    })
+    
+    // Track AddToCart event for bundle - Google Analytics
+    trackGAAddToCart({
+      currency: 'ZAR',
+      value: products.bundle.price,
+      items: [{
+        item_id: products.bundle.id,
+        item_name: products.bundle.name,
+        quantity: 1,
+        price: products.bundle.price
       }]
     })
   }
