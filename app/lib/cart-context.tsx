@@ -238,6 +238,51 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [state.items, state.total])
 
+  // Listen for discount code generation events
+  useEffect(() => {
+    const handleDiscountCodeGenerated = (event: CustomEvent) => {
+      const { code, percentage } = event.detail
+      if (code && percentage) {
+        dispatch({
+          type: 'APPLY_DISCOUNT',
+          payload: { code, percentage }
+        })
+        localStorage.setItem('lumeye_discount_code', code)
+      }
+    }
+
+    window.addEventListener('discountCodeGenerated', handleDiscountCodeGenerated as EventListener)
+
+    // Also reload discount code periodically if state doesn't have one
+    const checkDiscountInterval = setInterval(() => {
+      if (!state.discountCode) {
+        const savedDiscountCode = localStorage.getItem('lumeye_discount_code')
+        if (savedDiscountCode) {
+          fetch('/api/discount/validate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code: savedDiscountCode })
+          })
+            .then(res => res.json())
+            .then(data => {
+              if (data.valid && data.discountPercentage) {
+                dispatch({
+                  type: 'APPLY_DISCOUNT',
+                  payload: { code: savedDiscountCode, percentage: data.discountPercentage }
+                })
+              }
+            })
+            .catch(() => {})
+        }
+      }
+    }, 2000) // Check every 2 seconds
+
+    return () => {
+      window.removeEventListener('discountCodeGenerated', handleDiscountCodeGenerated as EventListener)
+      clearInterval(checkDiscountInterval)
+    }
+  }, [state.discountCode])
+
   return <CartContext.Provider value={{ state, dispatch }}>{children}</CartContext.Provider>
 }
 

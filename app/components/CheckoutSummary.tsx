@@ -49,9 +49,9 @@ export default function CheckoutSummary() {
           <span>Subtotal</span>
           <span>R{subtotal.toFixed(2)}</span>
         </div>
-        {discount > 0 && (
+        {discount > 0 && state.discountCode && (
           <div className="flex justify-between text-sm sm:text-base text-green-600">
-            <span>Discount ({state.discountPercentage}%)</span>
+            <span>Discount ({state.discountPercentage}%) - {state.discountCode}</span>
             <span className="font-medium">-R{discount.toFixed(2)}</span>
           </div>
         )}

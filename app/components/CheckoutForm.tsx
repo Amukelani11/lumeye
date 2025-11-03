@@ -37,14 +37,14 @@ export default function CheckoutForm() {
   })
   const [errors, setErrors] = useState<FormErrors>({})
 
-  // Load discount code from localStorage on mount
+  // Load discount code from localStorage on mount and when state changes
   useEffect(() => {
     const savedCode = localStorage.getItem('lumeye_discount_code')
     if (savedCode && !state.discountCode) {
       handleApplyDiscount(savedCode)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [state.discountCode])
 
   const handleApplyDiscount = async (code?: string) => {
     const codeToApply = code || discountCode.trim()
@@ -275,7 +275,27 @@ export default function CheckoutForm() {
     <div>
       <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
         {/* Discount Code */}
-        {!state.discountCode && (
+        {state.discountCode ? (
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-green-800">Discount Applied!</p>
+                <p className="text-xs text-green-600 mt-1">Code: <span className="font-mono font-semibold">{state.discountCode}</span> ({state.discountPercentage}% off)</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  dispatch({ type: 'REMOVE_DISCOUNT' })
+                  localStorage.removeItem('lumeye_discount_code')
+                  setDiscountCode("")
+                }}
+                className="text-sm text-green-700 hover:text-green-900 underline"
+              >
+                Remove
+              </button>
+            </div>
+          </div>
+        ) : (
           <div className="bg-pink-50 border border-pink-200 rounded-lg p-4">
             <label htmlFor="discountCode" className="block text-sm font-medium text-gray-700 mb-2">
               Have a discount code?
@@ -302,11 +322,6 @@ export default function CheckoutForm() {
               </button>
             </div>
             {discountError && <p className="mt-1 text-sm text-red-600">{discountError}</p>}
-            {state.discountCode && (
-              <p className="mt-2 text-sm text-green-600">
-                ✓ Discount code applied: {state.discountCode}
-              </p>
-            )}
           </div>
         )}
 

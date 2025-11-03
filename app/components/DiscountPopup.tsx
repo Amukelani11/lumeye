@@ -69,6 +69,12 @@ export default function DiscountPopup() {
         setDiscountCode(data.discountCode)
         setShowPopup(false)
 
+        // Trigger page reload or dispatch event to apply discount
+        // Dispatch a custom event that cart context can listen to
+        window.dispatchEvent(new CustomEvent('discountCodeGenerated', { 
+          detail: { code: data.discountCode, percentage: data.discountPercentage || 10 }
+        }))
+
         // Track cart abandonment with email
         fetch('/api/track-cart-abandonment', {
           method: 'POST',
