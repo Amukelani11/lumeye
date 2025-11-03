@@ -4,6 +4,8 @@ import { useEffect, useState, Suspense } from "react"
 import { CheckCircle, Package, Truck, Mail, XCircle } from "lucide-react"
 import Link from "next/link"
 import { useSearchParams, useRouter } from "next/navigation"
+import { getStoredTrackingParams, clearTrackingParams } from "@/lib/url-tracking"
+import { trackPurchase } from "@/lib/facebook-pixel-events"
 
 function OrderConfirmationContentInner() {
   const searchParams = useSearchParams()
@@ -73,6 +75,9 @@ function OrderConfirmationContentInner() {
           country: 'ZA'
         }
 
+        // Get tracking parameters from stored checkout data or localStorage
+        const trackingParams = pendingCheckout.trackingParams || getStoredTrackingParams() || {}
+
         const orderData = {
           email: pendingCheckout.formData.email,
           phone: pendingCheckout.formData.phone,
@@ -81,6 +86,7 @@ function OrderConfirmationContentInner() {
           paymentId: verifyResult.paymentId || checkoutIdToVerify,
           paymentAmount: pendingCheckout.amount,
           notes: `Payment processed via Yoco Checkout. Checkout ID: ${checkoutIdToVerify}`,
+          trackingParams: trackingParams, // Include URL tracking parameters
           items: pendingCheckout.items.map((item: any) => ({
             product_id: item.id,
             quantity: item.quantity,
@@ -107,6 +113,24 @@ function OrderConfirmationContentInner() {
         setOrderNumber(orderNum)
         setOrderCreated(true)
 
+        // Track Purchase event for Facebook Pixel
+        const contentIds = pendingCheckout.items.map((item: any) => item.id)
+        const contents = pendingCheckout.items.map((item: any) => ({
+          id: item.id,
+          quantity: item.quantity,
+          item_price: item.price
+        }))
+
+        trackPurchase({
+          content_ids: contentIds,
+          content_type: 'product',
+          value: pendingCheckout.amount,
+          currency: 'ZAR',
+          num_items: pendingCheckout.items.reduce((sum: number, item: any) => sum + item.quantity, 0),
+          contents: contents,
+          order_id: orderNum || undefined
+        })
+
         // Mark order as created to prevent duplicates on refresh
         if (orderNum) {
           sessionStorage.setItem('order_created', orderNum)
@@ -117,6 +141,9 @@ function OrderConfirmationContentInner() {
 
         // Clear cart
         localStorage.removeItem('lumeye-cart')
+
+        // Clear tracking parameters after successful purchase
+        clearTrackingParams()
 
       } catch (err) {
         console.error('Error verifying payment or creating order:', err)

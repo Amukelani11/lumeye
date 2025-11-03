@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { EmailService } from '@/lib/email'
+import { facebookConversions } from '@/lib/facebook-conversions'
 
 // Function to generate tracking number
 function generateTrackingNumber(): string {
@@ -20,7 +21,8 @@ export async function POST(request: NextRequest) {
       paymentId,
       paymentAmount,
       notes,
-      items
+      items,
+      trackingParams // URL tracking parameters for attribution
     } = await request.json()
 
     if (!email || !shippingAddress || !items || items.length === 0) {
@@ -76,7 +78,9 @@ export async function POST(request: NextRequest) {
         total_amount: totalAmount,
         currency: 'ZAR',
         tracking_number: trackingNumber,
-        notes: notes || `Payment processed via ${paymentMethod}. Payment ID: ${paymentId}`
+        notes: trackingParams 
+          ? `${notes || `Payment processed via ${paymentMethod}. Payment ID: ${paymentId}`}\n\nTracking Params: ${JSON.stringify(trackingParams)}`
+          : notes || `Payment processed via ${paymentMethod}. Payment ID: ${paymentId}`
       })
       .select()
       .single()
@@ -196,6 +200,32 @@ export async function POST(request: NextRequest) {
     } catch (emailError) {
       console.error('Error sending order confirmation email:', emailError)
       // Don't fail the order creation if email fails
+    }
+
+    // Send Purchase event to Facebook Conversions API
+    try {
+      await facebookConversions.sendPurchaseEvent({
+        email: email,
+        phone: phone,
+        firstName: shippingAddress.first_name,
+        lastName: shippingAddress.last_name,
+        city: shippingAddress.city,
+        zipCode: shippingAddress.postal_code,
+        country: shippingAddress.country || 'ZA',
+        currency: 'ZAR',
+        value: totalAmount,
+        items: items.map((item: any) => ({
+          product_id: item.product_id || item.id,
+          item_name: item.name || 'Lumeye Product',
+          quantity: item.quantity,
+          price: item.unit_price
+        })),
+        orderId: order.id,
+        orderNumber: order.order_number
+      })
+    } catch (fbError) {
+      console.error('Error sending Facebook Conversions API event:', fbError)
+      // Don't fail the order creation if Facebook event fails
     }
 
     return NextResponse.json({ 

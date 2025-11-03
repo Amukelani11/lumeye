@@ -4,6 +4,7 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { Shield, Truck, RotateCcw, ExternalLink } from "lucide-react"
 import { useCart } from "../lib/cart-context"
+import { getStoredTrackingParams } from "@/lib/url-tracking"
 
 interface FormData {
   email: string
@@ -193,13 +194,17 @@ export default function CheckoutForm() {
       const checkoutResult = await checkoutResponse.json()
       console.log('Checkout created successfully:', checkoutResult)
 
+      // Get tracking parameters for attribution
+      const trackingParams = getStoredTrackingParams()
+
       // Store checkout data in sessionStorage for order creation after payment
       sessionStorage.setItem('pending_checkout', JSON.stringify({
         checkoutId: checkoutResult.checkout.id,
         amount: total,
         formData: formData,
         items: state.items,
-        checkoutUrl: checkoutResult.checkout.redirectUrl
+        checkoutUrl: checkoutResult.checkout.redirectUrl,
+        trackingParams: trackingParams || {} // Include tracking parameters
       }))
 
       // Redirect to Yoco checkout page

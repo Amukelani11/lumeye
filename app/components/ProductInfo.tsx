@@ -6,6 +6,7 @@ import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { Star, Minus, Plus, ShoppingBag, Zap, Check } from "lucide-react"
 import { useCart } from "../lib/cart-context"
+import { trackAddToCart } from "@/lib/facebook-pixel-events"
 
 type ProductType = "wand" | "gel" | "bundle"
 
@@ -75,6 +76,21 @@ export default function ProductInfo({ selectedProduct: externalSelectedProduct, 
         },
       })
     }
+    
+    // Track AddToCart event for Facebook Pixel
+    trackAddToCart({
+      content_name: product.name,
+      content_ids: [product.id],
+      content_type: 'product',
+      value: product.price * finalQuantity,
+      currency: 'ZAR',
+      contents: [{
+        id: product.id,
+        quantity: finalQuantity,
+        item_price: product.price
+      }]
+    })
+    
     if (!productType) {
       setQuantity(1)
     }
@@ -91,6 +107,20 @@ export default function ProductInfo({ selectedProduct: externalSelectedProduct, 
         image: products.bundle.image,
       },
     })
+    
+    // Track AddToCart event for bundle
+    trackAddToCart({
+      content_name: products.bundle.name,
+      content_ids: [products.bundle.id],
+      content_type: 'product',
+      value: products.bundle.price,
+      currency: 'ZAR',
+      contents: [{
+        id: products.bundle.id,
+        quantity: 1,
+        item_price: products.bundle.price
+      }]
+    })
   }
 
   const buyNow = () => {
@@ -103,6 +133,21 @@ export default function ProductInfo({ selectedProduct: externalSelectedProduct, 
         image: currentProduct.image,
       },
     })
+    
+    // Track AddToCart and InitiateCheckout for Buy Now
+    trackAddToCart({
+      content_name: currentProduct.name,
+      content_ids: [currentProduct.id],
+      content_type: 'product',
+      value: currentProduct.price,
+      currency: 'ZAR',
+      contents: [{
+        id: currentProduct.id,
+        quantity: 1,
+        item_price: currentProduct.price
+      }]
+    })
+    
     router.push('/checkout')
   }
 

@@ -1,14 +1,37 @@
 "use client"
 
+import { useEffect } from "react"
 import { useCart } from "../lib/cart-context"
 import CheckoutForm from "../components/CheckoutForm"
 import CheckoutSummary from "../components/CheckoutSummary"
 import Link from "next/link"
 import { ArrowLeft, ShoppingBag } from "lucide-react"
 import Footer from "../components/Footer"
+import { trackInitiateCheckout } from "@/lib/facebook-pixel-events"
 
 export default function CheckoutPageClient() {
   const { state } = useCart()
+
+  // Track InitiateCheckout event when user lands on checkout page
+  useEffect(() => {
+    if (state.items.length > 0) {
+      const contentIds = state.items.map(item => item.id)
+      const contents = state.items.map(item => ({
+        id: item.id,
+        quantity: item.quantity,
+        item_price: item.price
+      }))
+
+      trackInitiateCheckout({
+        content_ids: contentIds,
+        content_type: 'product',
+        value: state.total,
+        currency: 'ZAR',
+        num_items: state.itemCount,
+        contents: contents
+      })
+    }
+  }, []) // Only track once on mount
 
   if (state.items.length === 0) {
     return (
