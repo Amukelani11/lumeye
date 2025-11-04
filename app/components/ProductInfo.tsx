@@ -15,28 +15,30 @@ const products = {
   wand: {
     id: "lumeye-glow-wand",
     name: "Lumeye Glow Wand",
-    price: 799,
-    originalPrice: 999,
+    price: 559.3,
+    originalPrice: 799,
     image: "/lumeyewandhero.png",
     description: "A precision-engineered LED device that visibly smooths fine lines, reduces puffiness, and enhances your skin's natural radiance. Clinically tested wavelengths. Effortless, elegant, and effective.",
   },
   gel: {
     id: "lumeye-glow-gel",
     name: "Lumeye Glow Gel",
-    price: 99,
-    originalPrice: 129,
+    price: 69.3,
+    originalPrice: 99,
     image: "/lumeyegelhero.png",
     description: "Formulated to amplify LED results — combining Hyaluronic Acid and Soothing Aloe for deep hydration and enhanced skin comfort. LED-safe formula that won't interfere with light therapy.",
   },
   bundle: {
     id: "lumeye-glow-kit",
     name: "Lumeye Glow Kit",
-    price: 849,
-    originalPrice: 898, // 799 + 99
+    price: 594.3,
+    originalPrice: 628.6, // 559.3 + 69.3
     image: "/lumeyebundleimage.png",
     description: "Maximize your results with the complete Lumeye system. Includes the Glow Wand and Glow Gel. Save when you bundle.",
   },
 }
+
+const formatPrice = (amount: number) => amount.toFixed(2)
 
 interface ProductInfoProps {
   selectedProduct?: ProductType
@@ -213,14 +215,14 @@ export default function ProductInfo({ selectedProduct: externalSelectedProduct, 
         {/* Price Display */}
         <div className="mb-6">
           <div className="flex items-center space-x-3 mb-2">
-            <span className="text-3xl font-bold text-pink-600">R{currentProduct.price}</span>
-            <span className="text-xl text-gray-400 line-through">R{currentProduct.originalPrice}</span>
+            <span className="text-3xl font-bold text-pink-600">R{formatPrice(currentProduct.price)}</span>
+            <span className="text-xl text-gray-400 line-through">R{formatPrice(currentProduct.originalPrice)}</span>
             <span className="bg-green-100 text-green-800 text-sm font-medium px-2 py-1 rounded-full">
               Save {savingsPercentage}%
             </span>
           </div>
           <p className="text-sm text-gray-600">
-            You save R{savings} compared to similar premium products
+            You save R{formatPrice(savings)} compared to similar premium products
           </p>
         </div>
 
@@ -244,7 +246,7 @@ export default function ProductInfo({ selectedProduct: externalSelectedProduct, 
             >
               <div className="text-left">
                 <div className="font-semibold text-gray-900 mb-1">Glow Wand</div>
-                <div className="text-sm text-gray-600">R{products.wand.price}</div>
+                <div className="text-sm text-gray-600">R{formatPrice(products.wand.price)}</div>
               </div>
             </button>
             <button
@@ -257,7 +259,7 @@ export default function ProductInfo({ selectedProduct: externalSelectedProduct, 
             >
               <div className="text-left">
                 <div className="font-semibold text-gray-900 mb-1">Glow Gel</div>
-                <div className="text-sm text-gray-600">R{products.gel.price}</div>
+                <div className="text-sm text-gray-600">R{formatPrice(products.gel.price)}</div>
               </div>
             </button>
           </div>
@@ -283,7 +285,7 @@ export default function ProductInfo({ selectedProduct: externalSelectedProduct, 
             className="w-full bg-pink-600 hover:bg-pink-700 text-white font-semibold py-4 px-6 rounded-lg transition-colors flex items-center justify-center space-x-2"
           >
             <Zap className="w-5 h-5" />
-            <span>Buy Now - R{currentProduct.price}</span>
+            <span>Buy Now - R{formatPrice(currentProduct.price)}</span>
           </button>
 
           {/* Add to Cart Button */}
@@ -303,13 +305,13 @@ export default function ProductInfo({ selectedProduct: externalSelectedProduct, 
         {/* Bundle Card */}
         <div className="border-2 border-pink-400 rounded-xl p-6 bg-gradient-to-br from-pink-50 to-rose-50 relative overflow-hidden">
           <div className="absolute top-2 right-2 bg-pink-600 text-white px-3 py-1 rounded-lg text-xs font-bold">
-            SAVE R{products.bundle.originalPrice - products.bundle.price}
+            SAVE R{formatPrice(products.bundle.originalPrice - products.bundle.price)}
           </div>
           
           <div className="mb-4">
             <h3 className="font-bold text-lg text-gray-900 mb-2">Glow Kit - Illuminate + Hydrate</h3>
             <p className="text-sm text-gray-700 mb-4">
-              Bundle both products and save R{products.bundle.originalPrice - products.bundle.price}
+              Bundle both products and save R{formatPrice(products.bundle.originalPrice - products.bundle.price)}
             </p>
           </div>
 
@@ -338,11 +340,11 @@ export default function ProductInfo({ selectedProduct: externalSelectedProduct, 
           {/* Bundle Price */}
           <div className="mb-4">
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-2xl font-bold text-gray-900">R{products.bundle.price}</span>
-              <span className="text-lg text-gray-400 line-through">R{products.bundle.originalPrice}</span>
+              <span className="text-2xl font-bold text-gray-900">R{formatPrice(products.bundle.price)}</span>
+              <span className="text-lg text-gray-400 line-through">R{formatPrice(products.bundle.originalPrice)}</span>
             </div>
             <p className="text-xs text-gray-600">
-              Save R{products.bundle.originalPrice - products.bundle.price} when you bundle
+              Save R{formatPrice(products.bundle.originalPrice - products.bundle.price)} when you bundle
             </p>
           </div>
 
@@ -366,7 +368,7 @@ export default function ProductInfo({ selectedProduct: externalSelectedProduct, 
             onClick={addBundleToCart}
             className="w-full bg-pink-600 hover:bg-pink-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
           >
-            Add Bundle to Cart - R{products.bundle.price}
+            Add Bundle to Cart - R{formatPrice(products.bundle.price)}
           </button>
         </div>
 
