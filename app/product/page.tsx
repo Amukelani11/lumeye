@@ -37,14 +37,14 @@ export const metadata: Metadata = {
     images: ['/product-twitter-image.jpg'],
   },
   other: {
-    'product:price:amount': '799',
+    'product:price:amount': '550.00',
     'product:price:currency': 'ZAR',
     'product:availability': 'in stock',
     'product:condition': 'new',
     'product:retailer_item_id': 'lumeye-glow-wand',
     'product:brand': 'Lumeye',
     'product:category': 'Beauty & Personal Care > Skincare > LED Devices',
-    'product:original_price:amount': '999',
+    'product:original_price:amount': '799.00',
     'product:original_price:currency': 'ZAR',
   },
 }

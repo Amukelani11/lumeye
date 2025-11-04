@@ -5,11 +5,12 @@ import Image from "next/image"
 import { Sparkles, Gift } from "lucide-react"
 
 export default function BundleSection() {
-  const wandPrice = 799
-  const gelPrice = 99
+  const wandPrice = 550
+  const gelPrice = 60
   const totalIndividual = wandPrice + gelPrice
-  const bundlePrice = 849
+  const bundlePrice = 599
   const savings = totalIndividual - bundlePrice
+  const formatPrice = (value: number) => value.toFixed(2)
 
   return (
     <section className="section-padding bg-white">
@@ -19,7 +20,7 @@ export default function BundleSection() {
             The Glow Kit — Illuminate + Hydrate
           </h2>
           <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
-            Maximize your results with the complete Lumeye system. Save R{savings} when you bundle.
+            Maximize your results with the complete Lumeye system. Save R{formatPrice(savings)} when you bundle.
           </p>
         </div>
 
@@ -41,10 +42,10 @@ export default function BundleSection() {
                   blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
                 />
               </div>
-              
+
               {/* Ribbon Badge */}
               <div className="absolute -top-3 -right-3 bg-pink-600 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-lg">
-                SAVE R{savings}
+                SAVE R{formatPrice(savings)}
               </div>
             </div>
 
@@ -108,15 +109,15 @@ export default function BundleSection() {
               <div className="bg-gray-50 rounded-xl p-6 mb-8 border border-gray-200">
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-gray-600 text-sm font-medium">Individual Price:</span>
-                  <span className="text-lg text-gray-400 line-through">R{totalIndividual}</span>
+                  <span className="text-lg text-gray-400 line-through">R{formatPrice(totalIndividual)}</span>
                 </div>
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-gray-600 text-sm font-medium">Bundle Price:</span>
-                  <span className="text-3xl font-bold text-gray-900">R{bundlePrice}</span>
+                  <span className="text-3xl font-bold text-gray-900">R{formatPrice(bundlePrice)}</span>
                 </div>
                 <div className="flex items-center justify-between pt-3 border-t border-gray-200">
                   <span className="font-semibold text-gray-900">You Save:</span>
-                  <span className="text-xl font-bold text-pink-600">R{savings}</span>
+                  <span className="text-xl font-bold text-pink-600">R{formatPrice(savings)}</span>
                 </div>
               </div>
 

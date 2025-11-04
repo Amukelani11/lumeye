@@ -110,7 +110,7 @@ function calculateTotals(state: Omit<CartState, "total" | "itemCount">): CartSta
       processedItems.push({
         id: "lumeye-glow-kit",
         name: "Lumeye Glow Kit",
-        price: 849,
+        price: 599,
         quantity: minQuantity,
         image: "/lumeyebundleimage.png"
       })
@@ -187,7 +187,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         const updatedItems = cartItems.map((item: CartItem) => {
           // Update old product references
           if (item.id === "lumeye-serum" || item.id === "lumeye-under-eye-serum") {
-            return { ...item, id: "lumeye-glow-wand", price: 799, name: "Lumeye Glow Wand", image: "/lumeyewandhero.png" }
+            return { ...item, id: "lumeye-glow-wand", price: 550, name: "Lumeye Glow Wand", image: "/lumeyewandhero.png" }
           }
           return item
         })
