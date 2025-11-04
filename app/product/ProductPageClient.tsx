@@ -8,9 +8,9 @@ import ProductViewContentTracker from "../components/ProductViewContentTracker"
 type ProductType = "wand" | "gel" | "bundle"
 
 const products = {
-  wand: { id: "lumeye-glow-wand", name: "Lumeye Glow Wand", price: 559.3 },
-  gel: { id: "lumeye-glow-gel", name: "Lumeye Glow Gel", price: 69.3 },
-  bundle: { id: "lumeye-glow-kit", name: "Lumeye Glow Kit", price: 594.3 },
+  wand: { id: "lumeye-glow-wand", name: "Lumeye Glow Wand", price: 550 },
+  gel: { id: "lumeye-glow-gel", name: "Lumeye Glow Gel", price: 60 },
+  bundle: { id: "lumeye-glow-kit", name: "Lumeye Glow Kit", price: 599 },
 }
 
 export default function ProductPageClient() {

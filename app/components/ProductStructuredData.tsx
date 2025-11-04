@@ -19,12 +19,12 @@ export default function ProductStructuredData() {
     ],
     "offers": {
       "@type": "Offer",
-      "price": "559.30",
+      "price": "550.00",
       "priceCurrency": "ZAR",
       "availability": "https://schema.org/InStock",
       "priceSpecification": {
         "@type": "UnitPriceSpecification",
-        "price": "559.30",
+        "price": "550.00",
         "priceCurrency": "ZAR",
         "referenceQuantity": {
           "@type": "QuantitativeValue",
@@ -33,7 +33,7 @@ export default function ProductStructuredData() {
         }
       },
       "highPrice": "799.00",
-      "lowPrice": "559.30",
+      "lowPrice": "550.00",
       "priceValidUntil": "2024-12-31",
       "seller": {
         "@type": "Organization",
@@ -151,12 +151,12 @@ export default function ProductStructuredData() {
       {
         "@type": "PropertyValue",
         "name": "Sale Price",
-        "value": "R559.30"
+        "value": "R550"
       },
       {
         "@type": "PropertyValue",
         "name": "Savings",
-        "value": "R239.70 (30% off)"
+        "value": "R249 (30% off)"
       }
     ]
   }
@@ -167,4 +167,4 @@ export default function ProductStructuredData() {
       dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
     />
   )
-} 
+}

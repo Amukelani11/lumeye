@@ -5,10 +5,10 @@ import Image from "next/image"
 import { Sparkles, Gift } from "lucide-react"
 
 export default function BundleSection() {
-  const wandPrice = 559.3
-  const gelPrice = 69.3
+  const wandPrice = 550
+  const gelPrice = 60
   const totalIndividual = wandPrice + gelPrice
-  const bundlePrice = 594.3
+  const bundlePrice = 599
   const savings = totalIndividual - bundlePrice
   const formatPrice = (value: number) => value.toFixed(2)
 
