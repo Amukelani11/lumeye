@@ -32,7 +32,7 @@ const products = {
     id: "lumeye-glow-kit",
     name: "Lumeye Glow Kit",
     price: 849,
-    originalPrice: 898, // 799 + 99
+    originalPrice: 1128, // Wand (999) + Gel (129) MSRP to show true bundle savings
     image: "/lumeyebundleimage.png",
     description: "Maximize your results with the complete Lumeye system. Includes the Glow Wand and Glow Gel. Save when you bundle.",
   },
@@ -380,6 +380,31 @@ export default function ProductInfo({ selectedProduct: externalSelectedProduct, 
           </div>
           <div>
             <div className="font-medium">30-Day Return</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile sticky action bar */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur border-t border-gray-200 shadow-[0_-6px_24px_rgba(0,0,0,0.08)] p-4">
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <div className="text-sm font-semibold text-gray-900 truncate">{currentProduct.name}</div>
+            <div className="text-base font-bold text-pink-600">R{currentProduct.price}</div>
+            <div className="text-xs text-gray-600">Free SA shipping · 30-day returns</div>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={buyNow}
+              className="bg-pink-600 hover:bg-pink-700 text-white text-sm font-semibold py-2 px-3 rounded-lg whitespace-nowrap"
+            >
+              Buy now
+            </button>
+            <button
+              onClick={() => addToCart()}
+              className="bg-white border border-pink-600 text-pink-600 hover:bg-pink-50 text-sm font-semibold py-2 px-3 rounded-lg whitespace-nowrap"
+            >
+              Add
+            </button>
           </div>
         </div>
       </div>

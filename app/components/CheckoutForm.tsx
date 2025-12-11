@@ -136,7 +136,6 @@ export default function CheckoutForm() {
       "address",
       "city",
       "postalCode",
-      "phone",
     ]
 
     requiredFields.forEach((field) => {
@@ -150,9 +149,15 @@ export default function CheckoutForm() {
       newErrors.email = "Please enter a valid email address"
     }
 
-    // Phone validation
-    if (formData.phone && !/^\d{10}$/.test(formData.phone.replace(/\s/g, ""))) {
-      newErrors.phone = "Please enter a valid 10-digit phone number"
+    // Phone validation (optional, accepts 0XXXXXXXXX or +27XXXXXXXXX)
+    if (formData.phone) {
+      const digits = formData.phone.replace(/\D/g, "")
+      const isLocal = digits.length === 10 && digits.startsWith("0")
+      const isInternational = digits.length === 11 && digits.startsWith("27")
+
+      if (!isLocal && !isInternational) {
+        newErrors.phone = "Use SA format: 0XXXXXXXXX or +27XXXXXXXXX"
+      }
     }
 
     setErrors(newErrors)
@@ -181,12 +186,6 @@ export default function CheckoutForm() {
       const discount = state.discountPercentage ? subtotal * (state.discountPercentage / 100) : 0
       const shipping = 0 as number // Free shipping for all orders
       const total = subtotal - discount + shipping
-
-      console.log('Creating Yoco checkout for amount:', total)
-      console.log('Cart items:', state.items)
-      console.log('Cart total:', state.total)
-      console.log('Amount in rand:', total)
-      console.log('Amount in cents:', Math.round(total * 100))
 
       // Create line items for display
       const lineItems = state.items.map(item => ({
@@ -224,7 +223,6 @@ export default function CheckoutForm() {
       }
 
       const checkoutResult = await checkoutResponse.json()
-      console.log('Checkout created successfully:', checkoutResult)
 
       // Get tracking parameters for attribution
       const trackingParams = getStoredTrackingParams()
@@ -240,7 +238,6 @@ export default function CheckoutForm() {
       }))
 
       // Redirect to Yoco checkout page
-      console.log('Redirecting to Yoco checkout:', checkoutResult.checkout.redirectUrl)
       window.location.href = checkoutResult.checkout.redirectUrl
       
     } catch (error) {
@@ -263,13 +260,6 @@ export default function CheckoutForm() {
     : state.items.length === 0 
     ? "Cart is Empty" 
     : "Proceed to Payment"
-
-  console.log('Checkout form state:', {
-    isProcessing,
-    cartItems: state.items.length,
-    total: state.total,
-    isButtonDisabled
-  })
 
   return (
     <div>
@@ -494,11 +484,11 @@ export default function CheckoutForm() {
         <div className="text-center text-xs sm:text-sm text-gray-600 px-2">
           <p>By completing your order, you agree to our</p>
           <p>
-            <a href="#" className="text-pink-600 hover:underline">
+            <a href="/terms" className="text-pink-600 hover:underline">
               Terms of Service
             </a>{" "}
             and{" "}
-            <a href="#" className="text-pink-600 hover:underline">
+            <a href="/privacy" className="text-pink-600 hover:underline">
               Privacy Policy
             </a>
           </p>

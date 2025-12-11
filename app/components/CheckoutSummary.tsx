@@ -67,8 +67,9 @@ export default function CheckoutSummary() {
         </div>
       </div>
 
-      <div className="mt-4 sm:mt-6 text-center text-xs sm:text-sm text-gray-600">
+      <div className="mt-4 sm:mt-6 text-center text-xs sm:text-sm text-gray-600 space-y-1">
         <p>🔒 Your payment information is secure and encrypted</p>
+        <p>🚚 Free SA shipping · 2–3 day delivery · 30-day returns</p>
       </div>
     </div>
   )

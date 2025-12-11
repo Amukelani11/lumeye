@@ -65,6 +65,7 @@ export default function HeroSection() {
                 </button>
               </Link>
             </div>
+            <p className="text-sm text-gray-600 mt-3">Free SA shipping · 2–3 day delivery · 30-day returns</p>
           </div>
 
           <div className="relative">

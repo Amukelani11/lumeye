@@ -1,5 +1,6 @@
 import type React from "react"
 import type { Metadata } from "next"
+import { Suspense } from "react"
 import { DM_Sans, Inter } from "next/font/google"
 import Script from "next/script"
 import "./globals.css"
@@ -137,15 +138,17 @@ export default function RootLayout({
           />
         </noscript>
         {/* End Meta Pixel Code */}
-        <PostHogAnalyticsProvider>
-          <CartProvider>
-            <ClientTrackingInit />
-            <ClientVisitorTracker />
-            <DiscountPopup />
-            <Header />
-            {children}
-          </CartProvider>
-        </PostHogAnalyticsProvider>
+        <Suspense fallback={null}>
+          <PostHogAnalyticsProvider>
+            <CartProvider>
+              <ClientTrackingInit />
+              <ClientVisitorTracker />
+              <DiscountPopup />
+              <Header />
+              {children}
+            </CartProvider>
+          </PostHogAnalyticsProvider>
+        </Suspense>
       </body>
     </html>
   )
