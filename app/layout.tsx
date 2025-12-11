@@ -4,6 +4,7 @@ import { DM_Sans, Inter } from "next/font/google"
 import Script from "next/script"
 import "./globals.css"
 import Header from "./components/Header"
+import PostHogAnalyticsProvider from "./components/PostHogProvider"
 import { CartProvider } from "./lib/cart-context"
 import ClientVisitorTracker from "./components/ClientVisitorTracker"
 import ClientTrackingInit from "./components/ClientTrackingInit"
@@ -136,13 +137,15 @@ export default function RootLayout({
           />
         </noscript>
         {/* End Meta Pixel Code */}
-        <CartProvider>
-          <ClientTrackingInit />
-          <ClientVisitorTracker />
-          <DiscountPopup />
-          <Header />
-          {children}
-        </CartProvider>
+        <PostHogAnalyticsProvider>
+          <CartProvider>
+            <ClientTrackingInit />
+            <ClientVisitorTracker />
+            <DiscountPopup />
+            <Header />
+            {children}
+          </CartProvider>
+        </PostHogAnalyticsProvider>
       </body>
     </html>
   )
