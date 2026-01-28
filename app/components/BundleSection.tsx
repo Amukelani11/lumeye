@@ -5,10 +5,10 @@ import Image from "next/image"
 import { Sparkles, Gift } from "lucide-react"
 
 export default function BundleSection() {
-  const wandPrice = 799
+  const wandPrice = 699
   const gelPrice = 99
   const totalIndividual = wandPrice + gelPrice
-  const bundlePrice = 849
+  const bundlePrice = 749
   const savings = totalIndividual - bundlePrice
 
   return (

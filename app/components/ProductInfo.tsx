@@ -15,7 +15,7 @@ const products = {
   wand: {
     id: "lumeye-glow-wand",
     name: "Lumeye Glow Wand",
-    price: 799,
+    price: 699,
     originalPrice: 999,
     image: "/lumeyewandhero.png",
     description: "A precision-engineered LED device that visibly smooths fine lines, reduces puffiness, and enhances your skin's natural radiance. Clinically tested wavelengths. Effortless, elegant, and effective.",
@@ -31,7 +31,7 @@ const products = {
   bundle: {
     id: "lumeye-glow-kit",
     name: "Lumeye Glow Kit",
-    price: 849,
+    price: 749,
     originalPrice: 1128, // Wand (999) + Gel (129) MSRP to show true bundle savings
     image: "/lumeyebundleimage.png",
     description: "Maximize your results with the complete Lumeye system. Includes the Glow Wand and Glow Gel. Save when you bundle.",

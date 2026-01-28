@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     images: ['/product-twitter-image.jpg'],
   },
   other: {
-    'product:price:amount': '799',
+    'product:price:amount': '699',
     'product:price:currency': 'ZAR',
     'product:availability': 'in stock',
     'product:condition': 'new',
